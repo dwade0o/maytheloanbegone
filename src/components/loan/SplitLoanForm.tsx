@@ -34,7 +34,6 @@ export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: Spli
     resolver: zodResolver(splitLoanFormSchema),
     defaultValues: {
       loanType: "split",
-      totalAmount: "",
       tranches: [
         {
           id: "1",
@@ -54,7 +53,6 @@ export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: Spli
   });
 
   const watchedTranches = watch("tranches");
-  const watchedTotalAmount = watch("totalAmount");
 
   const addTranche = () => {
     const newId = (fields.length + 1).toString();
@@ -89,9 +87,6 @@ export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: Spli
     return sum + (isNaN(amount) ? 0 : amount);
   }, 0) || 0;
 
-  const targetTotal = parseFloat(watchedTotalAmount || "0");
-  const isBalanced = Math.abs(currentTotal - targetTotal) < 0.01;
-
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -112,39 +107,20 @@ export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: Spli
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Total Amount */}
-            <div className="space-y-2">
-              <Label htmlFor="totalAmount" className="text-sm font-medium flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-blue-500" />
-                Total Loan Amount ($)
-              </Label>
-              <Input
-                id="totalAmount"
-                type="number"
-                step="0.01"
-                placeholder="e.g., 100000"
-                {...register("totalAmount")}
-                className="text-lg"
-              />
-              {errors.totalAmount && (
-                <p className="text-sm text-red-500">{errors.totalAmount.message}</p>
-              )}
-            </div>
-
-            {/* Balance Summary */}
-            {watchedTotalAmount && (
-              <div className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-                <div className="space-y-1">
-                  <div className="text-sm text-slate-600 dark:text-slate-400">Balance Check</div>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span>Target: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(targetTotal)}</span>
-                    <span>Current: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(currentTotal)}</span>
-                    <span>Remaining: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(targetTotal - currentTotal)}</span>
+            {/* Auto-calculated Total Amount */}
+            {currentTotal > 0 && (
+              <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-green-200 dark:border-green-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-medium text-green-700 dark:text-green-300">Total Loan Amount</div>
+                    <div className="text-2xl font-bold text-green-800 dark:text-green-200">
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(currentTotal)}
+                    </div>
                   </div>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                    Auto-calculated
+                  </Badge>
                 </div>
-                <Badge variant={isBalanced ? "default" : "destructive"}>
-                  {isBalanced ? "Balanced" : "Unbalanced"}
-                </Badge>
               </div>
             )}
 
@@ -187,7 +163,7 @@ export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: Spli
             <div className="flex gap-4">
               <Button
                 type="submit"
-                disabled={isCalculating || !isBalanced}
+                disabled={isCalculating || currentTotal === 0}
                 className="flex-1 bg-blue-500 hover:bg-blue-600"
               >
                 {isCalculating ? (

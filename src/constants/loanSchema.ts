@@ -23,25 +23,10 @@ export const loanTrancheSchema = z.object({
   path: ["endDate"],
 });
 
-// Split loan form schema
+// Split loan form schema (simplified - no manual total amount)
 export const splitLoanFormSchema = z.object({
   loanType: z.enum(["single", "split"]),
-  totalAmount: z.string().optional(),
   tranches: z.array(loanTrancheSchema).min(1, "At least one loan tranche is required"),
-}).refine((data) => {
-  if (data.loanType === "split") {
-    const totalTranches = data.tranches.reduce((sum, tranche) => {
-      return sum + parseFloat(tranche.amount || "0");
-    }, 0);
-    const targetTotal = parseFloat(data.totalAmount || "0");
-    
-    // Allow some tolerance for floating point precision
-    return Math.abs(totalTranches - targetTotal) < 0.01;
-  }
-  return true;
-}, {
-  message: "Sum of tranches must equal the total loan amount",
-  path: ["tranches"],
 });
 
 // Legacy single loan schema for backward compatibility
