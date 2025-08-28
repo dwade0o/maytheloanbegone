@@ -4,7 +4,7 @@ import { Calculator, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-import { LoanResults as LoanResultsType, formatCurrency } from "@/helpers/loanCalculations";
+import { LoanResults as LoanResultsType, formatCurrency } from "@/lib/helper/loanCalculations";
 
 interface LoanResultsProps {
   results: LoanResultsType | null;

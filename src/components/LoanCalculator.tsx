@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Calculator } from "lucide-react";
 
 import { FormData } from "@/constants/loanSchema";
-import { calculateLoan, LoanResults } from "@/helpers/loanCalculations";
+import { calculateLoan, LoanResults } from "@/lib/helper/loanCalculations";
 import { LoanForm, LoanResults as LoanResultsComponent } from "@/components/loan";
 
 export default function LoanCalculator() {

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 import { FormData, SplitLoanFormData } from "@/constants/loanSchema";
-import { calculateLoan, calculateSplitLoan, LoanResults, SplitLoanResults } from "@/helpers/loanCalculations";
+import { calculateLoan, calculateSplitLoan, LoanResults, SplitLoanResults } from "@/lib/helper/loanCalculations";
 import { LoanForm, LoanResults as LoanResultsComponent, SplitLoanForm, SplitLoanResults as SplitLoanResultsComponent } from "@/components/loan";
 
 export default function SplitLoanCalculator() {

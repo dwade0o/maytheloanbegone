@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { SplitLoanResults, formatCurrency } from "@/helpers/loanCalculations";
+import { SplitLoanResults, formatCurrency } from "@/lib/helper/loanCalculations";
 
 interface SplitLoanResultsProps {
   results: SplitLoanResults | null;
