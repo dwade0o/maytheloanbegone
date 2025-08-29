@@ -1,29 +1,20 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Calculator, Plus, DollarSign, Split } from "lucide-react";
+import { Calculator, Plus, Split } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
 import { splitLoanFormSchema, SplitLoanFormData, LoanTranche } from "@/constants/loanSchema";
 import LoanTrancheComponent from "./LoanTranche";
-
-interface SplitLoanFormProps {
-  onSubmit: (data: SplitLoanFormData) => void;
-  onReset: () => void;
-  isCalculating: boolean;
-}
+import { SplitLoanFormProps } from "@/types/common";
 
 export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: SplitLoanFormProps) {
-  const [loanType, setLoanType] = useState<"single" | "split">("split");
 
   const {
-    register,
     handleSubmit,
     formState: { errors },
     reset,

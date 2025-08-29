@@ -1,23 +1,5 @@
 import { FormData, LoanTranche, SplitLoanFormData } from "@/constants/loanSchema";
-
-export interface LoanResults {
-  monthlyPayment: number;
-  totalPayment: number;
-  totalInterest: number;
-  loanTermMonths: number;
-}
-
-export interface TrancheResults extends LoanResults {
-  id: string;
-  label?: string;
-  principal: number;
-}
-
-export interface SplitLoanResults {
-  combined: LoanResults;
-  tranches: TrancheResults[];
-  totalPrincipal: number;
-}
+import { LoanResults, TrancheResults, SplitLoanResults } from "@/types/loan";
 
 export const calculateLoan = async (data: FormData): Promise<LoanResults> => {
   // Simulate calculation delay for smooth UX

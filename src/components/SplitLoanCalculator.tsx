@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 import { FormData, SplitLoanFormData } from "@/constants/loanSchema";
-import { calculateLoan, calculateSplitLoan, LoanResults, SplitLoanResults } from "@/lib/helper/loanCalculations";
+import { calculateLoan, calculateSplitLoan } from "@/lib/helper/loanCalculations";
 import { LoanForm, LoanResults as LoanResultsComponent, SplitLoanForm, SplitLoanResults as SplitLoanResultsComponent } from "@/components/loan";
+import { CalculatorType, LoanResults, SplitLoanResults } from "@/types/loan";
 
 export default function SplitLoanCalculator() {
-  const [calculatorType, setCalculatorType] = useState<"single" | "split">("single");
+  const [calculatorType, setCalculatorType] = useState<CalculatorType>("single");
   const [singleResults, setSingleResults] = useState<LoanResults | null>(null);
   const [splitResults, setSplitResults] = useState<SplitLoanResults | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -51,7 +52,7 @@ export default function SplitLoanCalculator() {
     setSplitResults(null);
   };
 
-  const switchCalculatorType = (type: "single" | "split") => {
+  const switchCalculatorType = (type: CalculatorType) => {
     setCalculatorType(type);
     // Don't reset form data when switching - only clear results
     setSingleResults(null);

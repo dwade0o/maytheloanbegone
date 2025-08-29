@@ -10,12 +10,7 @@ import { Label } from "@/components/ui/label";
 
 import { formSchema, FormData } from "@/constants/loanSchema";
 import DateRange from "@/components/common/DateRange";
-
-interface LoanFormProps {
-  onSubmit: (data: FormData) => void;
-  onReset: () => void;
-  isCalculating: boolean;
-}
+import { LoanFormProps } from "@/types/common";
 
 export default function LoanForm({ onSubmit, onReset, isCalculating }: LoanFormProps) {
   const {
@@ -99,12 +94,12 @@ export default function LoanForm({ onSubmit, onReset, isCalculating }: LoanFormP
               startDate={{
                 value: watchedStartDate || "",
                 onChange: (value) => setValue("startDate", value),
-                error: errors.startDate?.message,
+                error: errors.startDate,
               }}
               endDate={{
                 value: watchedEndDate || "",
                 onChange: (value) => setValue("endDate", value),
-                error: errors.endDate?.message,
+                error: errors.endDate,
               }}
             />
 

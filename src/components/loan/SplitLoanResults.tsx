@@ -1,15 +1,12 @@
 import { motion } from "framer-motion";
-import { Calculator, TrendingUp, BarChart3, Percent } from "lucide-react";
+import { Calculator, BarChart3, Percent } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { SplitLoanResults, formatCurrency } from "@/lib/helper/loanCalculations";
-
-interface SplitLoanResultsProps {
-  results: SplitLoanResults | null;
-}
+import { formatCurrency } from "@/lib/helper/loanCalculations";
+import { SplitLoanResultsProps } from "@/types/common";
 
 export default function SplitLoanResultsComponent({ results }: SplitLoanResultsProps) {
   const fadeInUp = {

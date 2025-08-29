@@ -6,22 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { LoanTranche } from "@/constants/loanSchema";
 import DateRange from "@/components/common/DateRange";
-
-interface LoanTrancheProps {
-  tranche: LoanTranche;
-  index: number;
-  onUpdate: (field: keyof LoanTranche, value: string) => void;
-  onRemove: () => void;
-  canRemove: boolean;
-  errors?: {
-    amount?: string;
-    interestRate?: string;
-    startDate?: string;
-    endDate?: string;
-  };
-}
+import { LoanTrancheProps } from "@/types/common";
 
 export default function LoanTrancheComponent({
   tranche,
@@ -94,7 +80,7 @@ export default function LoanTrancheComponent({
                 className="text-base"
               />
               {errors.amount && (
-                <p className="text-sm text-red-500">{errors.amount}</p>
+                <p className="text-sm text-red-500">{errors.amount.message}</p>
               )}
             </div>
 
@@ -114,7 +100,7 @@ export default function LoanTrancheComponent({
                 className="text-base"
               />
               {errors.interestRate && (
-                <p className="text-sm text-red-500">{errors.interestRate}</p>
+                <p className="text-sm text-red-500">{errors.interestRate.message}</p>
               )}
             </div>
           </div>

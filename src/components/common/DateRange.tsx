@@ -1,22 +1,7 @@
 import { Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-interface DateRangeProps {
-  startDate: {
-    value: string;
-    onChange: (value: string) => void;
-    error?: string;
-  };
-  endDate: {
-    value: string;
-    onChange: (value: string) => void;
-    error?: string;
-  };
-  startLabel?: string;
-  endLabel?: string;
-  className?: string;
-}
+import { DateRangeProps } from "@/types/common";
 
 export default function DateRange({
   startDate,
@@ -41,7 +26,7 @@ export default function DateRange({
           className="text-lg"
         />
         {startDate.error && (
-          <p className="text-sm text-red-500">{startDate.error}</p>
+          <p className="text-sm text-red-500">{startDate.error.message}</p>
         )}
       </div>
 
@@ -58,7 +43,7 @@ export default function DateRange({
           className="text-lg"
         />
         {endDate.error && (
-          <p className="text-sm text-red-500">{endDate.error}</p>
+          <p className="text-sm text-red-500">{endDate.error.message}</p>
         )}
       </div>
     </div>
