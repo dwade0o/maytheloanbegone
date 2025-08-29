@@ -3,3 +3,5 @@ export { default as LoanResults } from "./LoanResults";
 export { default as SplitLoanForm } from "./SplitLoanForm";
 export { default as SplitLoanResults } from "./SplitLoanResults";
 export { default as LoanTranche } from "./LoanTranche";
+export { default as FixedPeriodForm } from "./FixedPeriodForm";
+export { default as FixedPeriodResults } from "./FixedPeriodResults";

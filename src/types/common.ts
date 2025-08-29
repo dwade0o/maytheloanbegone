@@ -1,6 +1,6 @@
 // Common type definitions used across components
-import { FormData, SplitLoanFormData, LoanTranche } from "@/constants/loanSchema";
-import { LoanResults, SplitLoanResults } from "@/types/loan";
+import { FormData, SplitLoanFormData, LoanTranche, FixedPeriodLoanData } from "@/constants/loanSchema";
+import { LoanResults, SplitLoanResults, FixedPeriodResults } from "@/types/loan";
 import { FieldError } from "react-hook-form";
 
 export interface DateRangeProps {
@@ -38,6 +38,17 @@ export interface SplitLoanFormProps {
 
 export interface SplitLoanResultsProps {
   results: SplitLoanResults | null;
+  isCalculating?: boolean;
+}
+
+export interface FixedPeriodFormProps {
+  onSubmit: (data: FixedPeriodLoanData & { futureRate?: string }) => void;
+  onReset: () => void;
+  isCalculating?: boolean;
+}
+
+export interface FixedPeriodResultsProps {
+  results: FixedPeriodResults | null;
   isCalculating?: boolean;
 }
 

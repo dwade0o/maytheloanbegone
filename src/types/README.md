@@ -27,8 +27,10 @@ import * as Types from '@/types';
 - `LoanResults` - Basic loan calculation results
 - `TrancheResults` - Extended results for loan tranches
 - `SplitLoanResults` - Combined results for split loans
-- `CalculatorType` - Calculator mode ("single" | "split")
+- `CalculatorType` - Calculator mode ("single" | "split" | "fixed-period")
 - `LoanType` - Loan type enum
+- `FixedPeriodLoanData` - Data structure for NZ-style fixed period loans with loan start date and current balance
+- `FixedPeriodResults` - Results showing fixed principal reduction + variable interest + payment breakdown
 
 ### Common Types (`common.ts`)
 - `DateRangeProps` - Date range component props
@@ -37,6 +39,8 @@ import * as Types from '@/types';
 - `SplitLoanFormProps` - Split loan form component props
 - `SplitLoanResultsProps` - Split results display component props
 - `LoanTrancheProps` - Loan tranche component props
+- `FixedPeriodFormProps` - Fixed period form component props
+- `FixedPeriodResultsProps` - Fixed period results display component props
 
 ## Notes
 
