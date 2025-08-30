@@ -1,11 +1,12 @@
-import { motion } from "framer-motion";
-import { Calculator, TrendingUp, Calendar, AlertCircle } from "lucide-react";
+import { TrendingUp, Calendar, AlertCircle } from "lucide-react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 import { FixedPeriodResults } from "@/types/loan";
 import { formatCurrency } from "@/lib/helper/loanCalculations";
+import LoanResultsBase from "@/components/common/LoanResultsBase";
+import FeaturedResult from "@/components/common/FeaturedResult";
+import ResultRow from "@/components/common/ResultRow";
 
 interface FixedPeriodResultsProps {
   results: FixedPeriodResults | null;
@@ -13,116 +14,91 @@ interface FixedPeriodResultsProps {
 }
 
 export default function FixedPeriodResultsComponent({ results }: FixedPeriodResultsProps) {
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5, delay: 0.2 }
-  };
-
   return (
-    <motion.div
-      variants={fadeInUp}
-      initial="initial"
-      animate="animate"
+    <LoanResultsBase
+      title="Fixed Period Results"
+      description="Your loan payment breakdown for the fixed rate period"
+      icon={<Calendar className="h-5 w-5 text-green-500" />}
+      results={results}
+      emptyStateDescription="Fill out the form to see your fixed period loan details"
     >
-      <Card className="shadow-xl border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm h-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-green-500" />
-            Fixed Period Results
-          </CardTitle>
-          <CardDescription>
-            Your loan payment breakdown for the fixed rate period
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {results ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-6"
-            >
-              {/* Total Fixed Rate Period Results */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Badge variant="default" className="bg-blue-500">
-                    Total Fixed Rate Period
-                  </Badge>
-                  <span className="text-sm text-slate-600 dark:text-slate-400">
-                    {results.totalPeriod.months} months
-                  </span>
-                </div>
+      {results && (
+        <>
+          {/* Total Fixed Rate Period Results */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Badge variant="default" className="bg-blue-500">
+                Total Fixed Rate Period
+              </Badge>
+              <span className="text-sm text-slate-600 dark:text-slate-400">
+                {results.totalPeriod.months} months
+              </span>
+            </div>
 
-                {/* Monthly Principal - Featured */}
-                <div className="p-6 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
-                  <div className="text-sm font-medium opacity-90">Monthly Principal Reduction</div>
-                  <div className="text-3xl font-bold">{formatCurrency(results.totalPeriod.monthlyPrincipal)}</div>
-                  <div className="text-sm opacity-75 mt-1">
-                    Fixed amount every month for {Math.floor(results.totalPeriod.months / 12)} years and {results.totalPeriod.months % 12} months
-                  </div>
-                </div>
+            <FeaturedResult
+              label="Monthly Principal Reduction"
+              value={formatCurrency(results.totalPeriod.monthlyPrincipal)}
+              subtitle={`Fixed amount every month for ${Math.floor(results.totalPeriod.months / 12)} years and ${results.totalPeriod.months % 12} months`}
+            />
 
-                {/* Monthly Interest - Featured */}
-                <div className="p-6 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 text-white">
-                  <div className="text-sm font-medium opacity-90">Monthly Interest (First Month)</div>
-                  <div className="text-3xl font-bold">{formatCurrency(results.totalPeriod.paymentBreakdown[0]?.interest || 0)}</div>
-                  <div className="text-sm opacity-75 mt-1">
-                    Decreases each month as balance reduces
-                  </div>
-                </div>
+            <FeaturedResult
+              label="Monthly Interest (First Month)"
+              value={formatCurrency(results.totalPeriod.paymentBreakdown[0]?.interest || 0)}
+              subtitle="Decreases each month as balance reduces"
+              gradient="from-orange-500 to-red-500"
+            />
 
-                {/* Total Monthly Payment - Featured */}
-                <div className="p-6 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-                  <div className="text-sm font-medium opacity-90">Total Monthly Payment (First Month)</div>
-                  <div className="text-3xl font-bold">{formatCurrency(results.totalPeriod.paymentBreakdown[0]?.totalPayment || 0)}</div>
-                  <div className="text-sm opacity-75 mt-1">
-                    Principal + Interest = {formatCurrency(results.totalPeriod.monthlyPrincipal)} + {formatCurrency(results.totalPeriod.paymentBreakdown[0]?.interest || 0)}
-                  </div>
-                </div>
+            <FeaturedResult
+              label="Total Monthly Payment (First Month)"
+              value={formatCurrency(results.totalPeriod.paymentBreakdown[0]?.totalPayment || 0)}
+              subtitle={`Principal + Interest = ${formatCurrency(results.totalPeriod.monthlyPrincipal)} + ${formatCurrency(results.totalPeriod.paymentBreakdown[0]?.interest || 0)}`}
+              gradient="from-green-500 to-emerald-500"
+            />
 
-                {/* Total Period Details */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-                    <div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">Total Paid</div>
-                      <div className="text-xl font-semibold">{formatCurrency(results.totalPeriod.totalPaid)}</div>
-                    </div>
-                    <Badge variant="secondary">
-                      Complete Period
-                    </Badge>
-                  </div>
+            {/* Total Period Details */}
+            <div className="space-y-3">
+              <ResultRow
+                label="Total Paid"
+                value={formatCurrency(results.totalPeriod.totalPaid)}
+                badge={{
+                  text: "Complete Period",
+                  variant: "secondary"
+                }}
+              />
 
-                  <div className="flex justify-between items-center p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-                    <div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">Principal Paid</div>
-                      <div className="text-xl font-semibold text-green-600">{formatCurrency(results.totalPeriod.principalPaid)}</div>
-                    </div>
-                    <Badge variant="outline" className="text-green-600 border-green-600">
-                      Principal
-                    </Badge>
-                  </div>
+              <ResultRow
+                label="Principal Paid"
+                value={formatCurrency(results.totalPeriod.principalPaid)}
+                valueColor="text-green-600"
+                badge={{
+                  text: "Principal",
+                  variant: "outline",
+                  className: "text-green-600 border-green-600"
+                }}
+              />
 
-                  <div className="flex justify-between items-center p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-                    <div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">Interest Paid</div>
-                      <div className="text-xl font-semibold text-orange-600">{formatCurrency(results.totalPeriod.interestPaid)}</div>
-                    </div>
-                    <Badge variant="outline" className="text-orange-600 border-orange-600">
-                      Interest
-                    </Badge>
-                  </div>
+              <ResultRow
+                label="Interest Paid"
+                value={formatCurrency(results.totalPeriod.interestPaid)}
+                valueColor="text-orange-600"
+                badge={{
+                  text: "Interest",
+                  variant: "outline",
+                  className: "text-orange-600 border-orange-600"
+                }}
+              />
 
-                  <div className="flex justify-between items-center p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50">
-                    <div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">Remaining Balance</div>
-                      <div className="text-xl font-semibold text-red-600">{formatCurrency(results.totalPeriod.remainingBalance)}</div>
-                    </div>
-                    <Badge variant="outline" className="text-red-600 border-red-600">
-                      After Fixed Period
-                    </Badge>
-                  </div>
-                </div>
+              <ResultRow
+                label="Remaining Balance"
+                value={formatCurrency(results.totalPeriod.remainingBalance)}
+                valueColor="text-red-600"
+                badge={{
+                  text: "After Fixed Period",
+                  variant: "outline",
+                  className: "text-red-600 border-red-600"
+                }}
+              />
+            </div>
 
                 {/* Monthly Payment Breakdown */}
                 <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700">
@@ -237,31 +213,17 @@ export default function FixedPeriodResultsComponent({ results }: FixedPeriodResu
                 </div>
               )}
 
-              {/* Summary */}
-              <div className="pt-4 border-t">
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  During your <strong>{results.totalPeriod.months}-month fixed rate period</strong>, you&apos;ll pay <strong>{formatCurrency(results.totalPeriod.interestPaid)}</strong> in interest and reduce your principal by <strong>{formatCurrency(results.totalPeriod.principalPaid)}</strong>.
-                  {results.futureEstimate && (
-                    <> After the fixed period ends, you&apos;ll still owe <strong>{formatCurrency(results.totalPeriod.remainingBalance)}</strong>.</>
-                  )}
-                </p>
-              </div>
-            </motion.div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="p-4 bg-slate-100 dark:bg-slate-700 rounded-full mb-4">
-                <Calculator className="h-8 w-8 text-slate-400" />
-              </div>
-              <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300 mb-2">
-                Ready to Calculate
-              </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Fill out the form to see your fixed period loan details
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </motion.div>
+          {/* Summary */}
+          <div className="pt-4 border-t">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              During your <strong>{results.totalPeriod.months}-month fixed rate period</strong>, you&apos;ll pay <strong>{formatCurrency(results.totalPeriod.interestPaid)}</strong> in interest and reduce your principal by <strong>{formatCurrency(results.totalPeriod.principalPaid)}</strong>.
+              {results.futureEstimate && (
+                <> After the fixed period ends, you&apos;ll still owe <strong>{formatCurrency(results.totalPeriod.remainingBalance)}</strong>.</>
+              )}
+            </p>
+          </div>
+        </>
+      )}
+    </LoanResultsBase>
   );
 }
