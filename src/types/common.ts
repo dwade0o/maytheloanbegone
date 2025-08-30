@@ -1,7 +1,16 @@
 // Common type definitions used across components
-import { FormData, SplitLoanFormData, LoanTranche, FixedPeriodLoanData } from "@/constants/loanSchema";
-import { LoanResults, SplitLoanResults, FixedPeriodResults } from "@/types/loan";
-import { FieldError } from "react-hook-form";
+import {
+  FormData,
+  SplitLoanFormData,
+  LoanTranche,
+  FixedPeriodLoanData,
+} from '@/constants/loanSchema';
+import {
+  LoanResults,
+  SplitLoanResults,
+  FixedPeriodResults,
+} from '@/types/loan';
+import { FieldError } from 'react-hook-form';
 
 export interface DateRangeProps {
   startDate: {

@@ -24,6 +24,7 @@ import * as Types from '@/types';
 ## Type Categories
 
 ### Loan Types (`loan.ts`)
+
 - `LoanResults` - Basic loan calculation results
 - `TrancheResults` - Extended results for loan tranches
 - `SplitLoanResults` - Combined results for split loans
@@ -33,6 +34,7 @@ import * as Types from '@/types';
 - `FixedPeriodResults` - Results showing fixed principal reduction + variable interest + payment breakdown
 
 ### Common Types (`common.ts`)
+
 - `DateRangeProps` - Date range component props
 - `LoanFormProps` - Loan form component props
 - `LoanResultsProps` - Results display component props

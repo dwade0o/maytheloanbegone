@@ -1,5 +1,15 @@
-import { FormData, SplitLoanFormData, LoanTranche, FixedPeriodLoanData } from "@/constants/loanSchema";
-import { LoanResults, TrancheResults, SplitLoanResults, FixedPeriodResults } from "@/types/loan";
+import {
+  FormData,
+  SplitLoanFormData,
+  LoanTranche,
+  FixedPeriodLoanData,
+} from '@/constants/loanSchema';
+import {
+  LoanResults,
+  TrancheResults,
+  SplitLoanResults,
+  FixedPeriodResults,
+} from '@/types/loan';
 
 export const calculateLoan = async (data: FormData): Promise<LoanResults> => {
   // Simulate calculation delay for smooth UX
@@ -8,30 +18,31 @@ export const calculateLoan = async (data: FormData): Promise<LoanResults> => {
   const principal = parseFloat(data.loanAmount);
   const annualRate = parseFloat(data.interestRate) / 100;
   const monthlyRate = annualRate / 12;
-  
+
   const startDate = new Date(data.startDate);
   const endDate = new Date(data.endDate);
-  
+
   // Calculate loan term in months
   const yearsDiff = endDate.getFullYear() - startDate.getFullYear();
   const monthsDiff = endDate.getMonth() - startDate.getMonth();
   const daysDiff = endDate.getDate() - startDate.getDate();
-  
+
   let totalMonths = yearsDiff * 12 + monthsDiff;
   if (daysDiff > 0) {
     totalMonths += daysDiff / 30; // Approximate additional days as fraction of month
   }
-  
+
   // Monthly payment calculation using standard loan formula
   let monthlyPayment: number;
   if (monthlyRate === 0) {
     // No interest case
     monthlyPayment = principal / totalMonths;
   } else {
-    monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
-                   (Math.pow(1 + monthlyRate, totalMonths) - 1);
+    monthlyPayment =
+      (principal * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths))) /
+      (Math.pow(1 + monthlyRate, totalMonths) - 1);
   }
-  
+
   const totalPayment = monthlyPayment * totalMonths;
   const totalInterest = totalPayment - principal;
 
@@ -43,34 +54,37 @@ export const calculateLoan = async (data: FormData): Promise<LoanResults> => {
   };
 };
 
-export const calculateLoanTranche = async (tranche: LoanTranche): Promise<TrancheResults> => {
+export const calculateLoanTranche = async (
+  tranche: LoanTranche
+): Promise<TrancheResults> => {
   const principal = parseFloat(tranche.amount);
   const annualRate = parseFloat(tranche.interestRate) / 100;
   const monthlyRate = annualRate / 12;
-  
+
   const startDate = new Date(tranche.startDate);
   const endDate = new Date(tranche.endDate);
-  
+
   // Calculate loan term in months
   const yearsDiff = endDate.getFullYear() - startDate.getFullYear();
   const monthsDiff = endDate.getMonth() - startDate.getMonth();
   const daysDiff = endDate.getDate() - startDate.getDate();
-  
+
   let totalMonths = yearsDiff * 12 + monthsDiff;
   if (daysDiff > 0) {
     totalMonths += daysDiff / 30; // Approximate additional days as fraction of month
   }
-  
+
   // Monthly payment calculation using standard loan formula
   let monthlyPayment: number;
   if (monthlyRate === 0) {
     // No interest case
     monthlyPayment = principal / totalMonths;
   } else {
-    monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
-                   (Math.pow(1 + monthlyRate, totalMonths) - 1);
+    monthlyPayment =
+      (principal * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths))) /
+      (Math.pow(1 + monthlyRate, totalMonths) - 1);
   }
-  
+
   const totalPayment = monthlyPayment * totalMonths;
   const totalInterest = totalPayment - principal;
 
@@ -85,7 +99,9 @@ export const calculateLoanTranche = async (tranche: LoanTranche): Promise<Tranch
   };
 };
 
-export const calculateSplitLoan = async (data: SplitLoanFormData): Promise<SplitLoanResults> => {
+export const calculateSplitLoan = async (
+  data: SplitLoanFormData
+): Promise<SplitLoanResults> => {
   // Simulate calculation delay for smooth UX
   await new Promise(resolve => setTimeout(resolve, 800));
 
@@ -95,14 +111,26 @@ export const calculateSplitLoan = async (data: SplitLoanFormData): Promise<Split
   );
 
   // Calculate combined totals
-  const totalPrincipal = trancheResults.reduce((sum, tranche) => sum + tranche.principal, 0);
-  const totalMonthlyPayment = trancheResults.reduce((sum, tranche) => sum + tranche.monthlyPayment, 0);
-  const totalPayment = trancheResults.reduce((sum, tranche) => sum + tranche.totalPayment, 0);
-  const totalInterest = trancheResults.reduce((sum, tranche) => sum + tranche.totalInterest, 0);
-  
+  const totalPrincipal = trancheResults.reduce(
+    (sum, tranche) => sum + tranche.principal,
+    0
+  );
+  const totalMonthlyPayment = trancheResults.reduce(
+    (sum, tranche) => sum + tranche.monthlyPayment,
+    0
+  );
+  const totalPayment = trancheResults.reduce(
+    (sum, tranche) => sum + tranche.totalPayment,
+    0
+  );
+  const totalInterest = trancheResults.reduce(
+    (sum, tranche) => sum + tranche.totalInterest,
+    0
+  );
+
   // Calculate weighted average loan term
   const weightedTermSum = trancheResults.reduce((sum, tranche) => {
-    return sum + (tranche.loanTermMonths * tranche.principal);
+    return sum + tranche.loanTermMonths * tranche.principal;
   }, 0);
   const averageLoanTermMonths = Math.round(weightedTermSum / totalPrincipal);
 
@@ -118,7 +146,10 @@ export const calculateSplitLoan = async (data: SplitLoanFormData): Promise<Split
   };
 };
 
-export const calculateFixedPeriodLoan = async (data: FixedPeriodLoanData, futureRate?: string): Promise<FixedPeriodResults> => {
+export const calculateFixedPeriodLoan = async (
+  data: FixedPeriodLoanData,
+  futureRate?: string
+): Promise<FixedPeriodResults> => {
   // Simulate calculation delay for smooth UX
   await new Promise(resolve => setTimeout(resolve, 800));
 
@@ -127,36 +158,39 @@ export const calculateFixedPeriodLoan = async (data: FixedPeriodLoanData, future
   const currentBalance = parseFloat(data.currentBalance);
   const annualRate = parseFloat(data.interestRate) / 100;
   const monthlyRate = annualRate / 12;
-  
+
   const loanStartDate = new Date(data.loanStartDate);
   const fixedStartDate = new Date(data.fixedRateStartDate);
   const fixedEndDate = new Date(data.fixedRateEndDate);
   const analysisStartDate = new Date(data.analysisStartDate);
   const analysisEndDate = new Date(data.analysisEndDate);
-  
+
   // Calculate total loan term in months
   const totalLoanTermMonths = totalLoanTermYears * 12;
-  
+
   // Calculate fixed rate period in months
   const totalFixedMonths = calculateMonthsBetween(fixedStartDate, fixedEndDate);
-  
+
   // Calculate analysis period in months
-  const analysisMonths = calculateMonthsBetween(analysisStartDate, analysisEndDate);
-  
+  const analysisMonths = calculateMonthsBetween(
+    analysisStartDate,
+    analysisEndDate
+  );
+
   // Calculate monthly principal reduction (fixed amount)
   const monthlyPrincipal = originalLoanAmount / totalLoanTermMonths;
-  
+
   // Calculate payment breakdown for fixed rate period
   let remainingBalance = currentBalance;
   let totalPrincipalPaid = 0;
   let totalInterestPaid = 0;
   const paymentBreakdown = [];
-  
+
   for (let month = 0; month < totalFixedMonths; month++) {
     const monthInterest = remainingBalance * monthlyRate;
     const monthPrincipalPaid = monthlyPrincipal;
     const totalPayment = monthPrincipalPaid + monthInterest;
-    
+
     paymentBreakdown.push({
       month: month + 1,
       balance: remainingBalance,
@@ -164,60 +198,69 @@ export const calculateFixedPeriodLoan = async (data: FixedPeriodLoanData, future
       interest: monthInterest,
       totalPayment: totalPayment,
     });
-    
+
     totalPrincipalPaid += monthPrincipalPaid;
     totalInterestPaid += monthInterest;
     remainingBalance -= monthPrincipalPaid;
   }
-  
+
   const totalPaid = totalPrincipalPaid + totalInterestPaid;
-  
+
   // Calculate analysis period results
-  const analysisStartMonth = calculateMonthsBetween(fixedStartDate, analysisStartDate);
-  const analysisEndMonth = calculateMonthsBetween(fixedStartDate, analysisEndDate);
-  
+  const analysisStartMonth = calculateMonthsBetween(
+    fixedStartDate,
+    analysisStartDate
+  );
+  const analysisEndMonth = calculateMonthsBetween(
+    fixedStartDate,
+    analysisEndDate
+  );
+
   let analysisPrincipalPaid = 0;
   let analysisInterestPaid = 0;
   let analysisBalance = currentBalance;
-  
+
   // Calculate principal and interest for analysis period
   for (let month = 0; month < analysisEndMonth; month++) {
     const monthInterest = analysisBalance * monthlyRate;
     const monthPrincipalPaid = monthlyPrincipal;
-    
+
     if (month >= analysisStartMonth) {
       analysisPrincipalPaid += monthPrincipalPaid;
       analysisInterestPaid += monthInterest;
     }
-    
+
     analysisBalance -= monthPrincipalPaid;
   }
-  
-  const analysisAmountToPay = (monthlyPrincipal * analysisMonths) + analysisInterestPaid;
+
+  const analysisAmountToPay =
+    monthlyPrincipal * analysisMonths + analysisInterestPaid;
 
   // Calculate future estimate if rate provided
   let futureEstimate;
   if (futureRate) {
     const futureAnnualRate = parseFloat(futureRate) / 100;
     const futureMonthlyRate = futureAnnualRate / 12;
-    
+
     // Calculate remaining payments after fixed period
-    const remainingMonths = totalLoanTermMonths - calculateMonthsBetween(loanStartDate, fixedEndDate);
-    
+    const remainingMonths =
+      totalLoanTermMonths - calculateMonthsBetween(loanStartDate, fixedEndDate);
+
     let futureTotalInterest = 0;
     let futureBalance = remainingBalance;
-    
+
     for (let month = 0; month < remainingMonths; month++) {
       const monthInterest = futureBalance * futureMonthlyRate;
       futureTotalInterest += monthInterest;
       futureBalance -= monthlyPrincipal;
     }
-    
-    const futureTotalPayment = (monthlyPrincipal * remainingMonths) + futureTotalInterest;
-    
+
+    const futureTotalPayment =
+      monthlyPrincipal * remainingMonths + futureTotalInterest;
+
     futureEstimate = {
       rate: futureRate,
-      monthlyPayment: monthlyPrincipal + (remainingBalance * futureMonthlyRate),
+      monthlyPayment: monthlyPrincipal + remainingBalance * futureMonthlyRate,
       totalPayment: futureTotalPayment,
       totalInterest: futureTotalInterest,
     };
@@ -252,12 +295,12 @@ const calculateMonthsBetween = (startDate: Date, endDate: Date): number => {
   const yearsDiff = endDate.getFullYear() - startDate.getFullYear();
   const monthsDiff = endDate.getMonth() - startDate.getMonth();
   const daysDiff = endDate.getDate() - startDate.getDate();
-  
+
   let totalMonths = yearsDiff * 12 + monthsDiff;
   if (daysDiff > 0) {
     totalMonths += daysDiff / 30; // Approximate additional days as fraction of month
   }
-  
+
   return Math.round(totalMonths);
 };
 

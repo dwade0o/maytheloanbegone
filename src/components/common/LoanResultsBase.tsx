@@ -1,8 +1,14 @@
-import { ReactNode } from "react";
-import { motion } from "framer-motion";
-import { Calculator } from "lucide-react";
+import { ReactNode } from 'react';
+import { motion } from 'framer-motion';
+import { Calculator } from 'lucide-react';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 interface LoanResultsBaseProps {
   title: string;
@@ -21,14 +27,14 @@ export default function LoanResultsBase({
   icon,
   children,
   results,
-  emptyStateTitle = "Ready to Calculate",
-  emptyStateDescription = "Fill out the form to see your loan payment details",
-  className = "",
+  emptyStateTitle = 'Ready to Calculate',
+  emptyStateDescription = 'Fill out the form to see your loan payment details',
+  className = '',
 }: LoanResultsBaseProps) {
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5, delay: 0.2 }
+    transition: { duration: 0.5, delay: 0.2 },
   };
 
   return (
@@ -44,9 +50,7 @@ export default function LoanResultsBase({
             {icon}
             {title}
           </CardTitle>
-          <CardDescription>
-            {description}
-          </CardDescription>
+          <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent>
           {results ? (

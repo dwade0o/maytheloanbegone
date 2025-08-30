@@ -1,9 +1,15 @@
-import { ReactNode } from "react";
-import { motion } from "framer-motion";
-import { Calculator } from "lucide-react";
+import { ReactNode } from 'react';
+import { motion } from 'framer-motion';
+import { Calculator } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 interface LoanFormBaseProps {
   title: string;
@@ -26,32 +32,35 @@ export default function LoanFormBase({
   onSubmit,
   onReset,
   isCalculating = false,
-  submitButtonText = "Calculate",
+  submitButtonText = 'Calculate',
   canSubmit = true,
-  className = "",
+  className = '',
 }: LoanFormBaseProps) {
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5 }
+    transition: { duration: 0.5 },
   };
 
   return (
-    <motion.div variants={fadeInUp} initial="initial" animate="animate" className={className}>
+    <motion.div
+      variants={fadeInUp}
+      initial="initial"
+      animate="animate"
+      className={className}
+    >
       <Card className="shadow-xl border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {icon}
             {title}
           </CardTitle>
-          <CardDescription>
-            {description}
-          </CardDescription>
+          <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-6">
             {children}
-            
+
             {/* Buttons */}
             <div className="flex gap-4">
               <Button
@@ -62,7 +71,11 @@ export default function LoanFormBase({
                 {isCalculating ? (
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: 'linear',
+                    }}
                     className="mr-2"
                   >
                     <Calculator className="h-4 w-4" />
@@ -70,7 +83,7 @@ export default function LoanFormBase({
                 ) : (
                   <Calculator className="mr-2 h-4 w-4" />
                 )}
-                {isCalculating ? "Calculating..." : submitButtonText}
+                {isCalculating ? 'Calculating...' : submitButtonText}
               </Button>
               <Button
                 type="button"

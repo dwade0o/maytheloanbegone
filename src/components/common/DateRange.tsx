@@ -1,20 +1,23 @@
-import { Calendar } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { DateRangeProps } from "@/types/common";
+import { Calendar } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { DateRangeProps } from '@/types/common';
 
 export default function DateRange({
   startDate,
   endDate,
-  startLabel = "Start Date",
-  endLabel = "End Date",
-  className = "",
+  startLabel = 'Start Date',
+  endLabel = 'End Date',
+  className = '',
 }: DateRangeProps) {
   return (
     <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${className}`}>
       {/* Start Date */}
       <div className="space-y-2">
-        <Label htmlFor="startDate" className="text-sm font-medium flex items-center gap-2">
+        <Label
+          htmlFor="startDate"
+          className="text-sm font-medium flex items-center gap-2"
+        >
           <Calendar className="h-4 w-4 text-blue-500" />
           {startLabel}
         </Label>
@@ -22,7 +25,7 @@ export default function DateRange({
           id="startDate"
           type="date"
           value={startDate.value}
-          onChange={(e) => startDate.onChange(e.target.value)}
+          onChange={e => startDate.onChange(e.target.value)}
           className="text-lg"
         />
         {startDate.error && (
@@ -39,7 +42,7 @@ export default function DateRange({
           id="endDate"
           type="date"
           value={endDate.value}
-          onChange={(e) => endDate.onChange(e.target.value)}
+          onChange={e => endDate.onChange(e.target.value)}
           className="text-lg"
         />
         {endDate.error && (

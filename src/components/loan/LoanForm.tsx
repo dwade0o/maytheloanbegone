@@ -1,14 +1,18 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { DollarSign, Percent } from "lucide-react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { DollarSign, Percent } from 'lucide-react';
 
-import { formSchema, FormData } from "@/constants/loanSchema";
-import LoanFormBase from "@/components/common/LoanFormBase";
-import FormField from "@/components/common/FormField";
-import DateRange from "@/components/common/DateRange";
-import { LoanFormProps } from "@/types/common";
+import { formSchema, FormData } from '@/constants/loanSchema';
+import LoanFormBase from '@/components/common/LoanFormBase';
+import FormField from '@/components/common/FormField';
+import DateRange from '@/components/common/DateRange';
+import { LoanFormProps } from '@/types/common';
 
-export default function LoanForm({ onSubmit, onReset, isCalculating }: LoanFormProps) {
+export default function LoanForm({
+  onSubmit,
+  onReset,
+  isCalculating,
+}: LoanFormProps) {
   const {
     register,
     handleSubmit,
@@ -20,8 +24,8 @@ export default function LoanForm({ onSubmit, onReset, isCalculating }: LoanFormP
     resolver: zodResolver(formSchema),
   });
 
-  const watchedStartDate = watch("startDate");
-  const watchedEndDate = watch("endDate");
+  const watchedStartDate = watch('startDate');
+  const watchedEndDate = watch('endDate');
 
   const handleReset = () => {
     reset();
@@ -60,13 +64,13 @@ export default function LoanForm({ onSubmit, onReset, isCalculating }: LoanFormP
 
       <DateRange
         startDate={{
-          value: watchedStartDate || "",
-          onChange: (value) => setValue("startDate", value),
+          value: watchedStartDate || '',
+          onChange: value => setValue('startDate', value),
           error: errors.startDate,
         }}
         endDate={{
-          value: watchedEndDate || "",
-          onChange: (value) => setValue("endDate", value),
+          value: watchedEndDate || '',
+          onChange: value => setValue('endDate', value),
           error: errors.endDate,
         }}
       />

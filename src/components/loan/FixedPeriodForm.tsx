@@ -1,20 +1,27 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Percent, Calendar, TrendingUp, DollarSign } from "lucide-react";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Percent, Calendar, TrendingUp, DollarSign } from 'lucide-react';
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-import { fixedPeriodLoanSchema, FixedPeriodLoanData } from "@/constants/loanSchema";
-import LoanFormBase from "@/components/common/LoanFormBase";
-import FormField from "@/components/common/FormField";
-import DateRange from "@/components/common/DateRange";
-import { FixedPeriodFormProps } from "@/types/common";
+import {
+  fixedPeriodLoanSchema,
+  FixedPeriodLoanData,
+} from '@/constants/loanSchema';
+import LoanFormBase from '@/components/common/LoanFormBase';
+import FormField from '@/components/common/FormField';
+import DateRange from '@/components/common/DateRange';
+import { FixedPeriodFormProps } from '@/types/common';
 
-export default function FixedPeriodForm({ onSubmit, onReset, isCalculating }: FixedPeriodFormProps) {
+export default function FixedPeriodForm({
+  onSubmit,
+  onReset,
+  isCalculating,
+}: FixedPeriodFormProps) {
   const [showFutureEstimate, setShowFutureEstimate] = useState(false);
-  const [futureRate, setFutureRate] = useState("");
+  const [futureRate, setFutureRate] = useState('');
 
   const {
     register,
@@ -27,15 +34,15 @@ export default function FixedPeriodForm({ onSubmit, onReset, isCalculating }: Fi
     resolver: zodResolver(fixedPeriodLoanSchema),
   });
 
-  const watchedFixedRateStartDate = watch("fixedRateStartDate");
-  const watchedFixedRateEndDate = watch("fixedRateEndDate");
-  const watchedAnalysisStartDate = watch("analysisStartDate");
-  const watchedAnalysisEndDate = watch("analysisEndDate");
+  const watchedFixedRateStartDate = watch('fixedRateStartDate');
+  const watchedFixedRateEndDate = watch('fixedRateEndDate');
+  const watchedAnalysisStartDate = watch('analysisStartDate');
+  const watchedAnalysisEndDate = watch('analysisEndDate');
 
   const handleReset = () => {
     reset();
     setShowFutureEstimate(false);
-    setFutureRate("");
+    setFutureRate('');
     onReset();
   };
 
@@ -114,13 +121,13 @@ export default function FixedPeriodForm({ onSubmit, onReset, isCalculating }: Fi
         </h3>
         <DateRange
           startDate={{
-            value: watchedFixedRateStartDate || "",
-            onChange: (value) => setValue("fixedRateStartDate", value),
+            value: watchedFixedRateStartDate || '',
+            onChange: value => setValue('fixedRateStartDate', value),
             error: errors.fixedRateStartDate,
           }}
           endDate={{
-            value: watchedFixedRateEndDate || "",
-            onChange: (value) => setValue("fixedRateEndDate", value),
+            value: watchedFixedRateEndDate || '',
+            onChange: value => setValue('fixedRateEndDate', value),
             error: errors.fixedRateEndDate,
           }}
           startLabel="Fixed Rate Start"
@@ -135,13 +142,13 @@ export default function FixedPeriodForm({ onSubmit, onReset, isCalculating }: Fi
         </h3>
         <DateRange
           startDate={{
-            value: watchedAnalysisStartDate || "",
-            onChange: (value) => setValue("analysisStartDate", value),
+            value: watchedAnalysisStartDate || '',
+            onChange: value => setValue('analysisStartDate', value),
             error: errors.analysisStartDate,
           }}
           endDate={{
-            value: watchedAnalysisEndDate || "",
-            onChange: (value) => setValue("analysisEndDate", value),
+            value: watchedAnalysisEndDate || '',
+            onChange: value => setValue('analysisEndDate', value),
             error: errors.analysisEndDate,
           }}
           startLabel="Analysis Start"
@@ -155,16 +162,20 @@ export default function FixedPeriodForm({ onSubmit, onReset, isCalculating }: Fi
           <input
             type="checkbox"
             id="showFutureEstimate"
+            data-testid="showFutureEstimate"
             checked={showFutureEstimate}
-            onChange={(e) => setShowFutureEstimate(e.target.checked)}
+            onChange={e => setShowFutureEstimate(e.target.checked)}
             className="rounded"
           />
-          <Label htmlFor="showFutureEstimate" className="text-sm font-medium flex items-center gap-2">
+          <Label
+            htmlFor="showFutureEstimate"
+            className="text-sm font-medium flex items-center gap-2"
+          >
             <TrendingUp className="h-4 w-4 text-blue-500" />
             Explore future rate scenarios
           </Label>
         </div>
-        
+
         {showFutureEstimate && (
           <div className="space-y-2 ml-6">
             <Label htmlFor="futureRate" className="text-sm font-medium">
@@ -172,15 +183,17 @@ export default function FixedPeriodForm({ onSubmit, onReset, isCalculating }: Fi
             </Label>
             <Input
               id="futureRate"
+              data-testid="futureRate"
               type="number"
               step="0.01"
               placeholder="e.g., 4.0"
               value={futureRate}
-              onChange={(e) => setFutureRate(e.target.value)}
+              onChange={e => setFutureRate(e.target.value)}
               className="text-lg"
             />
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              This will show estimated payments if the rate changes after your fixed period ends
+              This will show estimated payments if the rate changes after your
+              fixed period ends
             </p>
           </div>
         )}

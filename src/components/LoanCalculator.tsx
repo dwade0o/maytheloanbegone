@@ -1,13 +1,16 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Calculator } from "lucide-react";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Calculator } from 'lucide-react';
 
-import { FormData } from "@/constants/loanSchema";
-import { calculateLoan } from "@/lib/helper/loanCalculations";
-import { LoanForm, LoanResults as LoanResultsComponent } from "@/components/loan";
-import { LoanResults } from "@/types/loan";
+import { FormData } from '@/constants/loanSchema';
+import { calculateLoan } from '@/lib/helper/loanCalculations';
+import {
+  LoanForm,
+  LoanResults as LoanResultsComponent,
+} from '@/components/loan';
+import { LoanResults } from '@/types/loan';
 
 export default function LoanCalculator() {
   const [results, setResults] = useState<LoanResults | null>(null);
@@ -15,7 +18,7 @@ export default function LoanCalculator() {
 
   const handleCalculateLoan = async (data: FormData) => {
     setIsCalculating(true);
-    
+
     try {
       const calculationResults = await calculateLoan(data);
       setResults(calculationResults);
@@ -49,7 +52,8 @@ export default function LoanCalculator() {
             Loan Calculator
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-            Calculate your monthly payments, total interest, and loan details with our easy-to-use calculator
+            Calculate your monthly payments, total interest, and loan details
+            with our easy-to-use calculator
           </p>
         </motion.div>
 

@@ -1,13 +1,13 @@
-import { motion } from "framer-motion";
-import { Trash2, DollarSign, Percent } from "lucide-react";
+import { motion } from 'framer-motion';
+import { Trash2, DollarSign, Percent } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-import DateRange from "@/components/common/DateRange";
-import { LoanTrancheProps } from "@/types/common";
+import DateRange from '@/components/common/DateRange';
+import { LoanTrancheProps } from '@/types/common';
 
 export default function LoanTrancheComponent({
   tranche,
@@ -20,7 +20,7 @@ export default function LoanTrancheComponent({
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.3, delay: index * 0.1 }
+    transition: { duration: 0.3, delay: index * 0.1 },
   };
 
   return (
@@ -50,15 +50,18 @@ export default function LoanTrancheComponent({
         <CardContent className="space-y-4">
           {/* Label */}
           <div className="space-y-2">
-            <Label htmlFor={`label-${tranche.id}`} className="text-sm font-medium">
+            <Label
+              htmlFor={`label-${tranche.id}`}
+              className="text-sm font-medium"
+            >
               Label (Optional)
             </Label>
             <Input
               id={`label-${tranche.id}`}
               type="text"
               placeholder="e.g., Home Loan, Car Loan"
-              value={tranche.label || ""}
-              onChange={(e) => onUpdate("label", e.target.value)}
+              value={tranche.label || ''}
+              onChange={e => onUpdate('label', e.target.value)}
               className="text-base"
             />
           </div>
@@ -66,7 +69,10 @@ export default function LoanTrancheComponent({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Amount */}
             <div className="space-y-2">
-              <Label htmlFor={`amount-${tranche.id}`} className="text-sm font-medium flex items-center gap-2">
+              <Label
+                htmlFor={`amount-${tranche.id}`}
+                className="text-sm font-medium flex items-center gap-2"
+              >
                 <DollarSign className="h-4 w-4 text-blue-500" />
                 Amount ($)
               </Label>
@@ -76,7 +82,7 @@ export default function LoanTrancheComponent({
                 step="0.01"
                 placeholder="e.g., 40000"
                 value={tranche.amount}
-                onChange={(e) => onUpdate("amount", e.target.value)}
+                onChange={e => onUpdate('amount', e.target.value)}
                 className="text-base"
               />
               {errors.amount && (
@@ -86,7 +92,10 @@ export default function LoanTrancheComponent({
 
             {/* Interest Rate */}
             <div className="space-y-2">
-              <Label htmlFor={`interestRate-${tranche.id}`} className="text-sm font-medium flex items-center gap-2">
+              <Label
+                htmlFor={`interestRate-${tranche.id}`}
+                className="text-sm font-medium flex items-center gap-2"
+              >
                 <Percent className="h-4 w-4 text-blue-500" />
                 Interest Rate (%)
               </Label>
@@ -96,11 +105,13 @@ export default function LoanTrancheComponent({
                 step="0.01"
                 placeholder="e.g., 5.5"
                 value={tranche.interestRate}
-                onChange={(e) => onUpdate("interestRate", e.target.value)}
+                onChange={e => onUpdate('interestRate', e.target.value)}
                 className="text-base"
               />
               {errors.interestRate && (
-                <p className="text-sm text-red-500">{errors.interestRate.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.interestRate.message}
+                </p>
               )}
             </div>
           </div>
@@ -109,12 +120,12 @@ export default function LoanTrancheComponent({
           <DateRange
             startDate={{
               value: tranche.startDate,
-              onChange: (value) => onUpdate("startDate", value),
+              onChange: value => onUpdate('startDate', value),
               error: errors.startDate,
             }}
             endDate={{
               value: tranche.endDate,
-              onChange: (value) => onUpdate("endDate", value),
+              onChange: value => onUpdate('endDate', value),
               error: errors.endDate,
             }}
           />

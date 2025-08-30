@@ -19,10 +19,10 @@ export interface SplitLoanResults {
 }
 
 // Calculator type
-export type CalculatorType = "single" | "split" | "fixed-period";
+export type CalculatorType = 'single' | 'split' | 'fixed-period';
 
 // Loan type enum
-export type LoanType = "single" | "split" | "fixed-period";
+export type LoanType = 'single' | 'split' | 'fixed-period';
 
 // Fixed period loan data with NZ loan structure
 export interface FixedPeriodLoanData {

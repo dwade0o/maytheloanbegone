@@ -1,18 +1,25 @@
-import { useForm, useFieldArray } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Split } from "lucide-react";
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus, Split } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 
-import { splitLoanFormSchema, SplitLoanFormData, LoanTranche } from "@/constants/loanSchema";
-import LoanTrancheComponent from "./LoanTranche";
-import LoanFormBase from "@/components/common/LoanFormBase";
-import { SplitLoanFormProps } from "@/types/common";
+import {
+  splitLoanFormSchema,
+  SplitLoanFormData,
+  LoanTranche,
+} from '@/constants/loanSchema';
+import LoanTrancheComponent from './LoanTranche';
+import LoanFormBase from '@/components/common/LoanFormBase';
+import { SplitLoanFormProps } from '@/types/common';
 
-export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: SplitLoanFormProps) {
-
+export default function SplitLoanForm({
+  onSubmit,
+  onReset,
+  isCalculating,
+}: SplitLoanFormProps) {
   const {
     handleSubmit,
     formState: { errors },
@@ -23,15 +30,15 @@ export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: Spli
   } = useForm<SplitLoanFormData>({
     resolver: zodResolver(splitLoanFormSchema),
     defaultValues: {
-      loanType: "split",
+      loanType: 'split',
       tranches: [
         {
-          id: "1",
-          amount: "",
-          interestRate: "",
-          startDate: "",
-          endDate: "",
-          label: "",
+          id: '1',
+          amount: '',
+          interestRate: '',
+          startDate: '',
+          endDate: '',
+          label: '',
         },
       ],
     },
@@ -39,20 +46,20 @@ export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: Spli
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "tranches",
+    name: 'tranches',
   });
 
-  const watchedTranches = watch("tranches");
+  const watchedTranches = watch('tranches');
 
   const addTranche = () => {
     const newId = (fields.length + 1).toString();
     append({
       id: newId,
-      amount: "",
-      interestRate: "",
-      startDate: "",
-      endDate: "",
-      label: "",
+      amount: '',
+      interestRate: '',
+      startDate: '',
+      endDate: '',
+      label: '',
     });
   };
 
@@ -62,7 +69,11 @@ export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: Spli
     }
   };
 
-  const updateTranche = (index: number, field: keyof LoanTranche, value: string) => {
+  const updateTranche = (
+    index: number,
+    field: keyof LoanTranche,
+    value: string
+  ) => {
     setValue(`tranches.${index}.${field}`, value);
   };
 
@@ -72,10 +83,11 @@ export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: Spli
   };
 
   // Calculate current total of tranches
-  const currentTotal = watchedTranches?.reduce((sum, tranche) => {
-    const amount = parseFloat(tranche.amount || "0");
-    return sum + (isNaN(amount) ? 0 : amount);
-  }, 0) || 0;
+  const currentTotal =
+    watchedTranches?.reduce((sum, tranche) => {
+      const amount = parseFloat(tranche.amount || '0');
+      return sum + (isNaN(amount) ? 0 : amount);
+    }, 0) || 0;
 
   return (
     <LoanFormBase
@@ -93,12 +105,20 @@ export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: Spli
         <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-green-200 dark:border-green-700">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-medium text-green-700 dark:text-green-300">Total Loan Amount</div>
+              <div className="text-sm font-medium text-green-700 dark:text-green-300">
+                Total Loan Amount
+              </div>
               <div className="text-2xl font-bold text-green-800 dark:text-green-200">
-                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(currentTotal)}
+                {new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                }).format(currentTotal)}
               </div>
             </div>
-            <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+            <Badge
+              variant="secondary"
+              className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+            >
               Auto-calculated
             </Badge>
           </div>
@@ -127,7 +147,9 @@ export default function SplitLoanForm({ onSubmit, onReset, isCalculating }: Spli
               key={field.id}
               tranche={watchedTranches[index]}
               index={index}
-              onUpdate={(fieldName, value) => updateTranche(index, fieldName, value)}
+              onUpdate={(fieldName, value) =>
+                updateTranche(index, fieldName, value)
+              }
               onRemove={() => removeTranche(index)}
               canRemove={fields.length > 1}
               errors={errors.tranches?.[index]}
