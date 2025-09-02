@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import FixedPeriodForm from '@/components/loan/FixedPeriodForm';
 
 // Mock the FormField component
-jest.mock('@/components/common/FormField', () => ({
+jest.mock('@/components/fields/FormField', () => ({
   __esModule: true,
   default: ({
     id,

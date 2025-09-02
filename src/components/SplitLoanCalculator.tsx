@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, Split, CreditCard, Calendar } from 'lucide-react';
+import {
+  Calculator,
+  Split,
+  CreditCard,
+  Calendar,
+  TrendingUp,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,11 +17,13 @@ import {
   FormData,
   SplitLoanFormData,
   FixedPeriodLoanData,
+  FixedRateLoanFormData,
 } from '@/constants/loanSchema';
 import {
   calculateLoan,
   calculateSplitLoan,
   calculateFixedPeriodLoan,
+  calculateFixedRateLoan,
 } from '@/lib/helper/loanCalculations';
 import {
   LoanForm,
@@ -24,12 +32,15 @@ import {
   SplitLoanResults as SplitLoanResultsComponent,
   FixedPeriodForm,
   FixedPeriodResults,
+  FixedRateLoanForm,
+  FixedRateLoanResults,
 } from '@/components/loan';
 import {
   CalculatorType,
   LoanResults,
   SplitLoanResults,
   FixedPeriodResults as FixedPeriodResultsType,
+  FixedRateLoanResults as FixedRateLoanResultsType,
 } from '@/types/loan';
 
 export default function SplitLoanCalculator() {
@@ -41,6 +52,8 @@ export default function SplitLoanCalculator() {
   );
   const [fixedPeriodResults, setFixedPeriodResults] =
     useState<FixedPeriodResultsType | null>(null);
+  const [fixedRateResults, setFixedRateResults] =
+    useState<FixedRateLoanResultsType | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
   const handleSingleLoanCalculation = async (data: FormData) => {
@@ -49,8 +62,8 @@ export default function SplitLoanCalculator() {
     try {
       const results = await calculateLoan(data);
       setSingleResults(results);
-    } catch (error) {
-      console.error('Error calculating loan:', error);
+    } catch {
+      // Handle error silently or show user-friendly message
     } finally {
       setIsCalculating(false);
     }
@@ -62,8 +75,8 @@ export default function SplitLoanCalculator() {
     try {
       const results = await calculateSplitLoan(data);
       setSplitResults(results);
-    } catch (error) {
-      console.error('Error calculating split loan:', error);
+    } catch {
+      // Handle error silently or show user-friendly message
     } finally {
       setIsCalculating(false);
     }
@@ -77,8 +90,21 @@ export default function SplitLoanCalculator() {
     try {
       const results = await calculateFixedPeriodLoan(data, data.futureRate);
       setFixedPeriodResults(results);
-    } catch (error) {
-      console.error('Error calculating fixed period loan:', error);
+    } catch {
+      // Handle error silently or show user-friendly message
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  const handleFixedRateCalculation = async (data: FixedRateLoanFormData) => {
+    setIsCalculating(true);
+
+    try {
+      const results = await calculateFixedRateLoan(data);
+      setFixedRateResults(results);
+    } catch {
+      // Handle error silently or show user-friendly message
     } finally {
       setIsCalculating(false);
     }
@@ -96,12 +122,17 @@ export default function SplitLoanCalculator() {
     setFixedPeriodResults(null);
   };
 
+  const handleFixedRateReset = () => {
+    setFixedRateResults(null);
+  };
+
   const switchCalculatorType = (type: CalculatorType) => {
     setCalculatorType(type);
     // Don't reset form data when switching - only clear results
     setSingleResults(null);
     setSplitResults(null);
     setFixedPeriodResults(null);
+    setFixedRateResults(null);
   };
 
   return (
@@ -164,6 +195,17 @@ export default function SplitLoanCalculator() {
                 Realistic
               </Badge>
             </Button>
+            <Button
+              variant={calculatorType === 'fixed-rate' ? 'default' : 'outline'}
+              onClick={() => switchCalculatorType('fixed-rate')}
+              className="flex items-center gap-2"
+            >
+              <TrendingUp className="h-4 w-4" />
+              Fixed Rate
+              <Badge variant="secondary" className="ml-2">
+                Multi-Rate
+              </Badge>
+            </Button>
           </div>
         </motion.div>
 
@@ -200,6 +242,17 @@ export default function SplitLoanCalculator() {
                 }
               />
             </div>
+
+            {/* Fixed Rate Form */}
+            <div
+              className={calculatorType === 'fixed-rate' ? 'block' : 'hidden'}
+            >
+              <FixedRateLoanForm
+                onSubmit={handleFixedRateCalculation}
+                onReset={handleFixedRateReset}
+                isCalculating={isCalculating && calculatorType === 'fixed-rate'}
+              />
+            </div>
           </div>
 
           {/* Results Section */}
@@ -208,8 +261,10 @@ export default function SplitLoanCalculator() {
               <LoanResultsComponent results={singleResults} />
             ) : calculatorType === 'split' ? (
               <SplitLoanResultsComponent results={splitResults} />
-            ) : (
+            ) : calculatorType === 'fixed-period' ? (
               <FixedPeriodResults results={fixedPeriodResults} />
+            ) : (
+              <FixedRateLoanResults results={fixedRateResults} />
             )}
           </div>
         </div>
@@ -221,7 +276,7 @@ export default function SplitLoanCalculator() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-16 text-center"
         >
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             <div className="p-6 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
               <CreditCard className="h-8 w-8 text-blue-500 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Single Loan</h3>
@@ -245,6 +300,14 @@ export default function SplitLoanCalculator() {
                 Calculate payments for loans with known fixed rates for specific
                 periods. Perfect for adjustable-rate mortgages and rate change
                 planning.
+              </p>
+            </div>
+            <div className="p-6 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
+              <TrendingUp className="h-8 w-8 text-blue-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Fixed Rate</h3>
+              <p className="text-slate-600 dark:text-slate-300 text-sm">
+                Calculate payments for loans with multiple fixed rate periods.
+                Perfect for planning different interest rates over time.
               </p>
             </div>
           </div>

@@ -128,6 +128,16 @@ export default function LoanTrancheComponent({
               onChange: value => onUpdate('endDate', value),
               error: errors.endDate,
             }}
+            period={{
+              value: tranche.period || '',
+              onChange: value => onUpdate('period', value),
+              error: errors.period,
+            }}
+            periodType={{
+              value:
+                (tranche.periodType as 'days' | 'months' | 'years') || 'days',
+              onChange: value => onUpdate('periodType', value),
+            }}
           />
         </CardContent>
       </Card>

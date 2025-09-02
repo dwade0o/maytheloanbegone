@@ -4,6 +4,8 @@ import {
   SplitLoanFormData,
   LoanTranche,
   FixedPeriodLoanData,
+  FixedRateLoanFormData,
+  FixedRatePeriod,
 } from '@/constants/loanSchema';
 import {
   LoanResults,
@@ -23,8 +25,18 @@ export interface DateRangeProps {
     onChange: (value: string) => void;
     error?: FieldError;
   };
+  period?: {
+    value: string;
+    onChange: (value: string) => void;
+    error?: FieldError;
+  };
+  periodType?: {
+    value: 'days' | 'months' | 'years';
+    onChange: (value: 'days' | 'months' | 'years') => void;
+  };
   startLabel?: string;
   endLabel?: string;
+  periodLabel?: string;
   className?: string;
 }
 
@@ -61,6 +73,26 @@ export interface FixedPeriodResultsProps {
   isCalculating?: boolean;
 }
 
+export interface FixedRateLoanFormProps {
+  onSubmit: (data: FixedRateLoanFormData) => void;
+  onReset: () => void;
+  isCalculating?: boolean;
+}
+
+export interface FixedRatePeriodProps {
+  period: FixedRatePeriod;
+  index: number;
+  onUpdate: (fieldName: keyof FixedRatePeriod, value: string) => void;
+  onRemove: () => void;
+  canRemove: boolean;
+  errors?: {
+    interestRate?: FieldError;
+    startDate?: FieldError;
+    endDate?: FieldError;
+    period?: FieldError;
+  };
+}
+
 export interface LoanTrancheProps {
   tranche: LoanTranche;
   index: number;
@@ -72,5 +104,6 @@ export interface LoanTrancheProps {
     interestRate?: FieldError;
     startDate?: FieldError;
     endDate?: FieldError;
+    period?: FieldError;
   };
 }

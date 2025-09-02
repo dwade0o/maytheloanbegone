@@ -19,10 +19,10 @@ export interface SplitLoanResults {
 }
 
 // Calculator type
-export type CalculatorType = 'single' | 'split' | 'fixed-period';
+export type CalculatorType = 'single' | 'split' | 'fixed-period' | 'fixed-rate';
 
 // Loan type enum
-export type LoanType = 'single' | 'split' | 'fixed-period';
+export type LoanType = 'single' | 'split' | 'fixed-period' | 'fixed-rate';
 
 // Fixed period loan data with NZ loan structure
 export interface FixedPeriodLoanData {
@@ -71,5 +71,54 @@ export interface FixedPeriodResults {
     monthlyPayment: number;
     totalPayment: number;
     totalInterest: number;
+  };
+}
+
+// Fixed rate loan data with multiple periods
+export interface FixedRateLoanData {
+  loanType: 'fixed-rate';
+  loanAmount: string;
+  loanStartDate: string;
+  loanEndDate: string;
+  fixedRatePeriods: Array<{
+    id: string;
+    interestRate: string;
+    startDate: string;
+    endDate: string;
+    label?: string;
+  }>;
+}
+
+// Fixed rate loan results
+export interface FixedRateLoanResults {
+  loanAmount: number;
+  loanStartDate: string;
+  loanEndDate: string;
+  totalLoanTermMonths: number;
+  periods: Array<{
+    id: string;
+    label?: string;
+    startDate: string;
+    endDate: string;
+    months: number;
+    interestRate: number;
+    monthlyPayment: number;
+    totalPayment: number;
+    totalInterest: number;
+    principalPaid: number;
+    paymentBreakdown: Array<{
+      month: number;
+      balance: number;
+      principal: number;
+      interest: number;
+      totalPayment: number;
+    }>;
+  }>;
+  summary: {
+    totalPayment: number;
+    totalInterest: number;
+    averageMonthlyPayment: number;
+    coveragePercentage: number;
+    monthsCovered: number;
   };
 }

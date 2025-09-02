@@ -4,7 +4,7 @@ import { DollarSign, Percent } from 'lucide-react';
 
 import { formSchema, FormData } from '@/constants/loanSchema';
 import LoanFormBase from '@/components/common/LoanFormBase';
-import FormField from '@/components/common/FormField';
+import FormField from '@/components/fields/FormField';
 import DateRange from '@/components/common/DateRange';
 import { LoanFormProps } from '@/types/common';
 
@@ -26,6 +26,8 @@ export default function LoanForm({
 
   const watchedStartDate = watch('startDate');
   const watchedEndDate = watch('endDate');
+  const watchedPeriod = watch('period');
+  const watchedPeriodType = watch('periodType');
 
   const handleReset = () => {
     reset();
@@ -72,6 +74,15 @@ export default function LoanForm({
           value: watchedEndDate || '',
           onChange: value => setValue('endDate', value),
           error: errors.endDate,
+        }}
+        period={{
+          value: watchedPeriod || '',
+          onChange: value => setValue('period', value),
+          error: errors.period,
+        }}
+        periodType={{
+          value: (watchedPeriodType as 'days' | 'months' | 'years') || 'days',
+          onChange: value => setValue('periodType', value),
         }}
       />
     </LoanFormBase>

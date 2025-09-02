@@ -20,6 +20,15 @@ export const loanTrancheSchema = z
       }, 'Interest rate must be between 0 and 100'),
     startDate: z.string().min(1, 'Start date is required'),
     endDate: z.string().min(1, 'End date is required'),
+    period: z
+      .string()
+      .optional()
+      .refine(val => {
+        if (!val) return true; // Optional field
+        const num = parseInt(val);
+        return !isNaN(num) && num > 0;
+      }, 'Period must be a positive number'),
+    periodType: z.enum(['days', 'months', 'years']).optional(),
     label: z.string().optional(),
   })
   .refine(
@@ -31,6 +40,108 @@ export const loanTrancheSchema = z
     {
       message: 'End date must be after start date',
       path: ['endDate'],
+    }
+  );
+
+// Fixed rate period schema for different interest rates over time
+export const fixedRatePeriodSchema = z
+  .object({
+    id: z.string(),
+    interestRate: z
+      .string()
+      .min(1, 'Interest rate is required')
+      .refine(val => {
+        const num = parseFloat(val);
+        return !isNaN(num) && num >= 0 && num <= 100;
+      }, 'Interest rate must be between 0 and 100'),
+    startDate: z.string().min(1, 'Start date is required'),
+    endDate: z.string().min(1, 'End date is required'),
+    period: z
+      .string()
+      .optional()
+      .refine(val => {
+        if (!val) return true; // Optional field
+        const num = parseInt(val);
+        return !isNaN(num) && num > 0;
+      }, 'Period must be a positive number'),
+    periodType: z.enum(['days', 'months', 'years']).optional(),
+    label: z.string().optional(),
+  })
+  .refine(
+    data => {
+      const start = new Date(data.startDate);
+      const end = new Date(data.endDate);
+      return end > start;
+    },
+    {
+      message: 'End date must be after start date',
+      path: ['endDate'],
+    }
+  );
+
+// Fixed rate loan form schema
+export const fixedRateLoanFormSchema = z
+  .object({
+    loanType: z.enum(['single', 'split', 'fixed-period', 'fixed-rate']),
+    loanAmount: z
+      .string()
+      .min(1, 'Loan amount is required')
+      .refine(val => {
+        const num = parseFloat(val);
+        return !isNaN(num) && num > 0;
+      }, 'Loan amount must be a positive number'),
+    loanStartDate: z.string().min(1, 'Loan start date is required'),
+    loanEndDate: z.string().min(1, 'Loan end date is required'),
+    loanPeriod: z
+      .string()
+      .optional()
+      .refine(val => {
+        if (!val) return true; // Optional field
+        const num = parseInt(val);
+        return !isNaN(num) && num > 0;
+      }, 'Period must be a positive number'),
+    loanPeriodType: z.enum(['days', 'months', 'years']).optional(),
+    fixedRatePeriods: z
+      .array(fixedRatePeriodSchema)
+      .min(1, 'At least one fixed rate period is required'),
+  })
+  .refine(
+    data => {
+      const loanStart = new Date(data.loanStartDate);
+      const loanEnd = new Date(data.loanEndDate);
+
+      // Loan period must be valid
+      if (loanEnd <= loanStart) return false;
+
+      // All fixed rate periods must be within loan period
+      for (const period of data.fixedRatePeriods) {
+        const periodStart = new Date(period.startDate);
+        const periodEnd = new Date(period.endDate);
+
+        if (periodStart < loanStart || periodEnd > loanEnd) return false;
+      }
+
+      // Fixed rate periods should not overlap
+      for (let i = 0; i < data.fixedRatePeriods.length; i++) {
+        for (let j = i + 1; j < data.fixedRatePeriods.length; j++) {
+          const period1 = data.fixedRatePeriods[i];
+          const period2 = data.fixedRatePeriods[j];
+
+          const start1 = new Date(period1.startDate);
+          const end1 = new Date(period1.endDate);
+          const start2 = new Date(period2.startDate);
+          const end2 = new Date(period2.endDate);
+
+          // Check for overlap
+          if (start1 < end2 && start2 < end1) return false;
+        }
+      }
+
+      return true;
+    },
+    {
+      message: 'Fixed rate periods must be within loan period and not overlap',
+      path: ['fixedRatePeriods'],
     }
   );
 
@@ -76,8 +187,26 @@ export const fixedPeriodLoanSchema = z
       }, 'Interest rate must be between 0 and 100'),
     fixedRateStartDate: z.string().min(1, 'Fixed rate start date is required'),
     fixedRateEndDate: z.string().min(1, 'Fixed rate end date is required'),
+    fixedRatePeriod: z
+      .string()
+      .optional()
+      .refine(val => {
+        if (!val) return true; // Optional field
+        const num = parseInt(val);
+        return !isNaN(num) && num > 0;
+      }, 'Fixed rate period must be a positive number'),
+    fixedRatePeriodType: z.enum(['days', 'months', 'years']).optional(),
     analysisStartDate: z.string().min(1, 'Analysis start date is required'),
     analysisEndDate: z.string().min(1, 'Analysis end date is required'),
+    analysisPeriod: z
+      .string()
+      .optional()
+      .refine(val => {
+        if (!val) return true; // Optional field
+        const num = parseInt(val);
+        return !isNaN(num) && num > 0;
+      }, 'Analysis period must be a positive number'),
+    analysisPeriodType: z.enum(['days', 'months', 'years']).optional(),
   })
   .refine(
     data => {
@@ -127,6 +256,15 @@ export const formSchema = z
       }, 'Interest rate must be between 0 and 100'),
     startDate: z.string().min(1, 'Start date is required'),
     endDate: z.string().min(1, 'End date is required'),
+    period: z
+      .string()
+      .optional()
+      .refine(val => {
+        if (!val) return true; // Optional field
+        const num = parseInt(val);
+        return !isNaN(num) && num > 0;
+      }, 'Period must be a positive number'),
+    periodType: z.enum(['days', 'months', 'years']).optional(),
   })
   .refine(
     data => {
@@ -141,6 +279,8 @@ export const formSchema = z
   );
 
 export type LoanTranche = z.infer<typeof loanTrancheSchema>;
+export type FixedRatePeriod = z.infer<typeof fixedRatePeriodSchema>;
 export type SplitLoanFormData = z.infer<typeof splitLoanFormSchema>;
 export type FormData = z.infer<typeof formSchema>;
 export type FixedPeriodLoanData = z.infer<typeof fixedPeriodLoanSchema>;
+export type FixedRateLoanFormData = z.infer<typeof fixedRateLoanFormSchema>;

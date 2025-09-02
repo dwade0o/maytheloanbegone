@@ -22,8 +22,8 @@ export default function LoanCalculator() {
     try {
       const calculationResults = await calculateLoan(data);
       setResults(calculationResults);
-    } catch (error) {
-      console.error('Error calculating loan:', error);
+    } catch {
+      // Handle error silently or show user-friendly message
     } finally {
       setIsCalculating(false);
     }

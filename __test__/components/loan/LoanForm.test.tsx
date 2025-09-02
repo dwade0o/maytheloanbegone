@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import LoanForm from '@/components/loan/LoanForm';
 
 // Mock the FormField component
-jest.mock('@/components/common/FormField', () => ({
+jest.mock('@/components/fields/FormField', () => ({
   __esModule: true,
   default: ({
     id,

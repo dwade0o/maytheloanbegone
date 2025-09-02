@@ -1,54 +1,67 @@
-import { Calendar } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { DateRangeProps } from '@/types/common';
+import { useDateRange } from '@/hooks/useDateRange';
+import { DateField, PeriodField } from '@/components/fields';
 
 export default function DateRange({
   startDate,
   endDate,
+  period,
+  periodType,
   startLabel = 'Start Date',
   endLabel = 'End Date',
+  periodLabel = 'Period',
   className = '',
 }: DateRangeProps) {
+  // Use custom hook for all DateRange logic
+  const {
+    dateErrors,
+    handleStartDateChange,
+    handleEndDateChange,
+    handlePeriodChange,
+    handlePeriodTypeChange,
+  } = useDateRange({ startDate, endDate, period, periodType });
+
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${className}`}>
+    <div className={`flex flex-col sm:flex-row gap-4 ${className}`}>
       {/* Start Date */}
-      <div className="space-y-2">
-        <Label
-          htmlFor="startDate"
-          className="text-sm font-medium flex items-center gap-2"
-        >
-          <Calendar className="h-4 w-4 text-blue-500" />
-          {startLabel}
-        </Label>
-        <Input
-          id="startDate"
-          type="date"
-          value={startDate.value}
-          onChange={e => startDate.onChange(e.target.value)}
-          className="text-lg"
-        />
-        {startDate.error && (
-          <p className="text-sm text-red-500">{startDate.error.message}</p>
-        )}
-      </div>
+      <DateField
+        id="startDate"
+        label={startLabel}
+        value={startDate.value}
+        onChange={handleStartDateChange}
+        error={startDate.error?.message || dateErrors.startDate}
+        showIcon={true}
+        max={endDate.value}
+      />
 
       {/* End Date */}
-      <div className="space-y-2">
-        <Label htmlFor="endDate" className="text-sm font-medium">
-          {endLabel}
-        </Label>
-        <Input
-          id="endDate"
-          type="date"
-          value={endDate.value}
-          onChange={e => endDate.onChange(e.target.value)}
-          className="text-lg"
+      <DateField
+        id="endDate"
+        label={endLabel}
+        value={endDate.value}
+        onChange={handleEndDateChange}
+        error={endDate.error?.message || dateErrors.endDate}
+        min={startDate.value}
+      />
+
+      {/* Period */}
+      {period && (
+        <PeriodField
+          id="period"
+          label={periodLabel}
+          value={period.value}
+          onChange={handlePeriodChange}
+          error={period.error?.message}
+          periodType={
+            periodType
+              ? {
+                  value: periodType.value,
+                  onChange: handlePeriodTypeChange,
+                }
+              : undefined
+          }
         />
-        {endDate.error && (
-          <p className="text-sm text-red-500">{endDate.error.message}</p>
-        )}
-      </div>
+      )}
     </div>
   );
 }

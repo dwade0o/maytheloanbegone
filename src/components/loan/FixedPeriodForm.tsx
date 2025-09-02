@@ -11,7 +11,7 @@ import {
   FixedPeriodLoanData,
 } from '@/constants/loanSchema';
 import LoanFormBase from '@/components/common/LoanFormBase';
-import FormField from '@/components/common/FormField';
+import FormField from '@/components/fields/FormField';
 import DateRange from '@/components/common/DateRange';
 import { FixedPeriodFormProps } from '@/types/common';
 
@@ -36,8 +36,12 @@ export default function FixedPeriodForm({
 
   const watchedFixedRateStartDate = watch('fixedRateStartDate');
   const watchedFixedRateEndDate = watch('fixedRateEndDate');
+  const watchedFixedRatePeriod = watch('fixedRatePeriod');
+  const watchedFixedRatePeriodType = watch('fixedRatePeriodType');
   const watchedAnalysisStartDate = watch('analysisStartDate');
   const watchedAnalysisEndDate = watch('analysisEndDate');
+  const watchedAnalysisPeriod = watch('analysisPeriod');
+  const watchedAnalysisPeriodType = watch('analysisPeriodType');
 
   const handleReset = () => {
     reset();
@@ -130,8 +134,20 @@ export default function FixedPeriodForm({
             onChange: value => setValue('fixedRateEndDate', value),
             error: errors.fixedRateEndDate,
           }}
+          period={{
+            value: watchedFixedRatePeriod || '',
+            onChange: value => setValue('fixedRatePeriod', value),
+            error: errors.fixedRatePeriod,
+          }}
+          periodType={{
+            value:
+              (watchedFixedRatePeriodType as 'days' | 'months' | 'years') ||
+              'days',
+            onChange: value => setValue('fixedRatePeriodType', value),
+          }}
           startLabel="Fixed Rate Start"
           endLabel="Fixed Rate End"
+          periodLabel="Fixed Rate Period"
         />
       </div>
 
@@ -151,8 +167,20 @@ export default function FixedPeriodForm({
             onChange: value => setValue('analysisEndDate', value),
             error: errors.analysisEndDate,
           }}
+          period={{
+            value: watchedAnalysisPeriod || '',
+            onChange: value => setValue('analysisPeriod', value),
+            error: errors.analysisPeriod,
+          }}
+          periodType={{
+            value:
+              (watchedAnalysisPeriodType as 'days' | 'months' | 'years') ||
+              'days',
+            onChange: value => setValue('analysisPeriodType', value),
+          }}
           startLabel="Analysis Start"
           endLabel="Analysis End"
+          periodLabel="Analysis Period"
         />
       </div>
 

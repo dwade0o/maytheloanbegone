@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import FormField from '@/components/common/FormField';
+import FormField from '@/components/fields/FormField';
 import { FieldError } from 'react-hook-form';
 
 // Mock the UI components

@@ -1,0 +1,69 @@
+import { Clock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+interface PeriodFieldProps {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  periodType?: {
+    value: 'days' | 'months' | 'years';
+    onChange: (value: 'days' | 'months' | 'years') => void;
+  };
+  className?: string;
+}
+
+export default function PeriodField({
+  id,
+  label,
+  value,
+  onChange,
+  error,
+  periodType,
+  className = '',
+}: PeriodFieldProps) {
+  return (
+    <div className={`space-y-2 flex-[1.4] ${className}`}>
+      <Label
+        htmlFor={id}
+        className="text-sm font-medium flex items-center gap-2"
+      >
+        <Clock className="h-4 w-4 text-green-500" />
+        {label}
+      </Label>
+      <div className="flex gap-2">
+        <Input
+          id={id}
+          type="number"
+          min="1"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          className="text-base flex-1 min-w-[80px]"
+          placeholder="Amount"
+        />
+        {periodType && (
+          <Select value={periodType.value} onValueChange={periodType.onChange}>
+            <SelectTrigger className="w-28 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="days">Days</SelectItem>
+              <SelectItem value="months">Months</SelectItem>
+              <SelectItem value="years">Years</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
+  );
+}
