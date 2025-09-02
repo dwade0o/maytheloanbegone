@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,6 +32,12 @@ export default function PeriodField({
   periodType,
   className = '',
 }: PeriodFieldProps) {
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   return (
     <div className={`space-y-2 flex-[1.4] ${className}`}>
       <Label
@@ -50,7 +57,7 @@ export default function PeriodField({
           className="text-base flex-1 min-w-[80px]"
           placeholder="Amount"
         />
-        {periodType && (
+        {periodType && isHydrated && (
           <Select value={periodType.value} onValueChange={periodType.onChange}>
             <SelectTrigger className="w-28 text-sm">
               <SelectValue />
@@ -61,6 +68,11 @@ export default function PeriodField({
               <SelectItem value="years">Years</SelectItem>
             </SelectContent>
           </Select>
+        )}
+        {periodType && !isHydrated && (
+          <div className="w-28 h-9 border border-input rounded-md bg-transparent px-3 py-2 text-sm flex items-center justify-center">
+            {periodType.value}
+          </div>
         )}
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}

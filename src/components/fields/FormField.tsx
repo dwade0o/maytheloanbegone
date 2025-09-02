@@ -31,14 +31,32 @@ export default function FormField({
   value,
   onChange,
 }: FormFieldProps) {
-  const inputProps = register
-    ? register(id)
-    : {
-        value,
-        onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-          onChange?.(e.target.value),
-      };
+  // If register is provided, use it directly
+  if (register) {
+    const registerProps = register(id);
+    return (
+      <div className={`space-y-2 ${className}`}>
+        <Label
+          htmlFor={id}
+          className="text-sm font-medium flex items-center gap-2"
+        >
+          {icon}
+          {label}
+        </Label>
+        <Input
+          id={id}
+          type={type}
+          step={step}
+          placeholder={placeholder}
+          {...registerProps}
+          className="text-lg"
+        />
+        {error && <p className="text-sm text-red-500">{error.message}</p>}
+      </div>
+    );
+  }
 
+  // Otherwise use controlled input with value/onChange
   return (
     <div className={`space-y-2 ${className}`}>
       <Label
@@ -53,7 +71,8 @@ export default function FormField({
         type={type}
         step={step}
         placeholder={placeholder}
-        {...inputProps}
+        value={value || ''}
+        onChange={e => onChange?.(e.target.value)}
         className="text-lg"
       />
       {error && <p className="text-sm text-red-500">{error.message}</p>}

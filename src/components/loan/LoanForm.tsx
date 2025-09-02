@@ -16,18 +16,44 @@ export default function LoanForm({
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, touchedFields },
     reset,
     watch,
     setValue,
+    trigger,
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
   });
 
   const watchedStartDate = watch('startDate');
   const watchedEndDate = watch('endDate');
   const watchedPeriod = watch('period');
   const watchedPeriodType = watch('periodType');
+
+  // Function to trigger validation
+  const handleValidationTrigger = () => {
+    // Trigger validation for all fields to ensure consistency
+    trigger();
+  };
+
+  // Custom onChange handlers that mark fields as touched
+  const handleStartDateChange = (value: string) => {
+    setValue('startDate', value, { shouldTouch: true, shouldValidate: true });
+  };
+
+  const handleEndDateChange = (value: string) => {
+    setValue('endDate', value, { shouldTouch: true, shouldValidate: true });
+  };
+
+  const handlePeriodChange = (value: string) => {
+    setValue('period', value, { shouldTouch: true, shouldValidate: true });
+  };
+
+  const handlePeriodTypeChange = (value: 'days' | 'months' | 'years') => {
+    setValue('periodType', value, { shouldTouch: true, shouldValidate: true });
+  };
 
   const handleReset = () => {
     reset();
@@ -50,7 +76,7 @@ export default function LoanForm({
         step="0.01"
         placeholder="e.g., 250000"
         register={register}
-        error={errors.loanAmount}
+        error={touchedFields.loanAmount ? errors.loanAmount : undefined}
       />
 
       <FormField
@@ -61,29 +87,30 @@ export default function LoanForm({
         placeholder="e.g., 5.5"
         icon={<Percent className="h-4 w-4 text-blue-500" />}
         register={register}
-        error={errors.interestRate}
+        error={touchedFields.interestRate ? errors.interestRate : undefined}
       />
 
       <DateRange
         startDate={{
           value: watchedStartDate || '',
-          onChange: value => setValue('startDate', value),
-          error: errors.startDate,
+          onChange: handleStartDateChange,
+          error: touchedFields.startDate ? errors.startDate : undefined,
         }}
         endDate={{
           value: watchedEndDate || '',
-          onChange: value => setValue('endDate', value),
-          error: errors.endDate,
+          onChange: handleEndDateChange,
+          error: touchedFields.endDate ? errors.endDate : undefined,
         }}
         period={{
           value: watchedPeriod || '',
-          onChange: value => setValue('period', value),
-          error: errors.period,
+          onChange: handlePeriodChange,
+          error: touchedFields.period ? errors.period : undefined,
         }}
         periodType={{
           value: (watchedPeriodType as 'days' | 'months' | 'years') || 'days',
-          onChange: value => setValue('periodType', value),
+          onChange: handlePeriodTypeChange,
         }}
+        onValidationTrigger={handleValidationTrigger}
       />
     </LoanFormBase>
   );

@@ -11,7 +11,8 @@ export default function DateRange({
   endLabel = 'End Date',
   periodLabel = 'Period',
   className = '',
-}: DateRangeProps) {
+  onValidationTrigger,
+}: DateRangeProps & { onValidationTrigger?: () => void }) {
   // Use custom hook for all DateRange logic
   const {
     dateErrors,
@@ -19,7 +20,13 @@ export default function DateRange({
     handleEndDateChange,
     handlePeriodChange,
     handlePeriodTypeChange,
-  } = useDateRange({ startDate, endDate, period, periodType });
+  } = useDateRange({
+    startDate,
+    endDate,
+    period,
+    periodType,
+    onValidationTrigger,
+  });
 
   return (
     <div className={`flex flex-col sm:flex-row gap-4 ${className}`}>

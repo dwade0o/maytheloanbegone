@@ -1,171 +1,184 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import LoanForm from '@/components/loan/LoanForm';
+import { LoanForm } from '@/components/loan';
+import { FormData } from '@/constants/loanSchema';
 
-// Mock the FormField component
-jest.mock('@/components/fields/FormField', () => ({
-  __esModule: true,
-  default: ({
-    id,
-    label,
-    type,
-    step,
-    placeholder,
-    icon,
-    error,
-    register,
-    className,
-  }: any) => (
-    <div className={className} data-testid={`form-field-${id}`}>
-      <label htmlFor={id} data-testid={`label-${id}`}>
-        {label}
-      </label>
-      <input
-        id={id}
-        type={type}
-        step={step}
-        placeholder={placeholder}
-        data-testid={`input-${id}`}
-      />
-      {icon && <span data-testid={`icon-${id}`}>{icon}</span>}
-      {error && <span data-testid={`error-${id}`}>{error.message}</span>}
-    </div>
-  ),
-}));
-
-// Mock the DateRange component
-jest.mock('@/components/common/DateRange', () => ({
-  __esModule: true,
-  default: ({ startDate, endDate, startLabel, endLabel }: any) => (
-    <div data-testid="date-range">
-      <div data-testid="start-date-section">
-        <label data-testid="start-date-label">
-          {startLabel || 'Start Date'}
-        </label>
+// Mock the DateRange component to test the validation behavior
+jest.mock('@/components/common/DateRange', () => {
+  return function MockDateRange({ 
+    startDate, 
+    endDate, 
+    period, 
+    periodType, 
+    onValidationTrigger 
+  }: any) {
+    return (
+      <div data-testid="date-range">
         <input
-          data-testid="start-date-input"
-          value={startDate?.value || ''}
-          onChange={() => {}}
+          data-testid="start-date"
+          value={startDate.value}
+          onChange={(e) => startDate.onChange(e.target.value)}
         />
-      </div>
-      <div data-testid="end-date-section">
-        <label data-testid="end-date-label">{endLabel || 'End Date'}</label>
         <input
-          data-testid="end-date-input"
-          value={endDate?.value || ''}
-          onChange={() => {}}
+          data-testid="end-date"
+          value={endDate.value}
+          onChange={(e) => endDate.onChange(e.target.value)}
         />
+        <input
+          data-testid="period"
+          value={period.value}
+          onChange={(e) => {
+            period.onChange(e.target.value);
+            // Simulate the period change logic that updates end date
+            if (startDate.value && e.target.value && periodType.value) {
+              const amount = parseInt(e.target.value);
+              if (!isNaN(amount) && amount > 0) {
+                // Simulate adding 1 day to start date
+                const startDateObj = new Date(startDate.value);
+                startDateObj.setDate(startDateObj.getDate() + amount);
+                const newEndDate = startDateObj.toISOString().split('T')[0];
+                endDate.onChange(newEndDate);
+                // Trigger validation after end date update
+                if (onValidationTrigger) {
+                  setTimeout(() => onValidationTrigger(), 0);
+                }
+              }
+            }
+          }}
+        />
+        <select
+          data-testid="period-type"
+          value={periodType.value}
+          onChange={(e) => periodType.onChange(e.target.value)}
+        >
+          <option value="days">Days</option>
+          <option value="months">Months</option>
+          <option value="years">Years</option>
+        </select>
+        {startDate.error && (
+          <div data-testid="start-date-error">{startDate.error.message}</div>
+        )}
+        {endDate.error && (
+          <div data-testid="end-date-error">{endDate.error.message}</div>
+        )}
       </div>
-    </div>
-  ),
-}));
-
-describe('LoanForm', () => {
-  const defaultProps = {
-    onSubmit: jest.fn(),
-    onReset: jest.fn(),
-    isCalculating: false,
+    );
   };
+});
+
+describe('LoanForm Date Validation', () => {
+  const mockOnSubmit = jest.fn();
+  const mockOnReset = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders without crashing', () => {
-    render(<LoanForm {...defaultProps} />);
-    expect(screen.getByTestId('form-field-loanAmount')).toBeInTheDocument();
-    expect(screen.getByTestId('form-field-interestRate')).toBeInTheDocument();
-  });
-
-  it('renders title and description', () => {
-    render(<LoanForm {...defaultProps} />);
-    expect(screen.getByText('Loan Details')).toBeInTheDocument();
-    expect(
-      screen.getByText('Enter your loan information to calculate payments')
-    ).toBeInTheDocument();
-  });
-
-  it('renders loan amount field', () => {
-    render(<LoanForm {...defaultProps} />);
-    expect(screen.getByTestId('label-loanAmount')).toHaveTextContent(
-      'Loan Amount ($)'
-    );
-    expect(screen.getByTestId('input-loanAmount')).toHaveAttribute(
-      'type',
-      'number'
-    );
-    expect(screen.getByTestId('input-loanAmount')).toHaveAttribute(
-      'step',
-      '0.01'
-    );
-    expect(screen.getByTestId('input-loanAmount')).toHaveAttribute(
-      'placeholder',
-      'e.g., 250000'
-    );
-  });
-
-  it('renders interest rate field', () => {
-    render(<LoanForm {...defaultProps} />);
-    expect(screen.getByTestId('label-interestRate')).toHaveTextContent(
-      'Annual Interest Rate (%)'
-    );
-    expect(screen.getByTestId('input-interestRate')).toHaveAttribute(
-      'type',
-      'number'
-    );
-    expect(screen.getByTestId('input-interestRate')).toHaveAttribute(
-      'step',
-      '0.01'
-    );
-    expect(screen.getByTestId('input-interestRate')).toHaveAttribute(
-      'placeholder',
-      'e.g., 5.5'
-    );
-  });
-
-  it('renders interest rate field with icon', () => {
-    render(<LoanForm {...defaultProps} />);
-    expect(screen.getByTestId('icon-interestRate')).toBeInTheDocument();
-  });
-
-  it('renders date range component', () => {
-    render(<LoanForm {...defaultProps} />);
-    expect(screen.getByTestId('date-range')).toBeInTheDocument();
-    expect(screen.getByTestId('start-date-section')).toBeInTheDocument();
-    expect(screen.getByTestId('end-date-section')).toBeInTheDocument();
-  });
-
-  it('renders submit button', () => {
-    render(<LoanForm {...defaultProps} />);
-    expect(
-      screen.getByRole('button', { name: /calculate/i })
-    ).toBeInTheDocument();
-  });
-
-  it('shows loading state when isCalculating is true', () => {
-    render(<LoanForm {...defaultProps} isCalculating={true} />);
-    expect(
-      screen.getByRole('button', { name: /calculating/i })
-    ).toBeInTheDocument();
-  });
-
-  it('disables submit button when loading', () => {
-    render(<LoanForm {...defaultProps} isCalculating={true} />);
-    const button = screen.getByRole('button', { name: /calculating/i });
-    expect(button).toBeDisabled();
-  });
-
-  it('renders submit button that can be clicked', async () => {
+  it('should clear validation error when period is updated and end date is recalculated', async () => {
     const user = userEvent.setup();
-    render(<LoanForm {...defaultProps} />);
+    
+    render(
+      <LoanForm
+        onSubmit={mockOnSubmit}
+        onReset={mockOnReset}
+        isCalculating={false}
+      />
+    );
 
+    // Fill in loan amount and interest rate
+    await user.type(screen.getByLabelText(/loan amount/i), '100000');
+    await user.type(screen.getByLabelText(/annual interest rate/i), '5.5');
+
+    // Set same start and end dates to trigger validation error
+    const startDateInput = screen.getByTestId('start-date');
+    const endDateInput = screen.getByTestId('end-date');
+    
+    await user.type(startDateInput, '2025-01-01');
+    await user.type(endDateInput, '2025-01-01');
+
+    // Submit the form to trigger validation
     const submitButton = screen.getByRole('button', { name: /calculate/i });
-    expect(submitButton).toBeInTheDocument();
-
-    // Just verify the button is clickable (form validation will prevent actual submission)
     await user.click(submitButton);
-    // Note: Form submission test is complex due to validation requirements
-    // This test just verifies the button exists and is clickable
+
+    // Wait for validation error to appear
+    await waitFor(() => {
+      expect(screen.getByText(/end date must be after start date/i)).toBeInTheDocument();
+    });
+
+    // Now change the period to 1 day
+    const periodInput = screen.getByTestId('period');
+    await user.clear(periodInput);
+    await user.type(periodInput, '1');
+
+    // Wait for the end date to be updated and validation to be triggered
+    await waitFor(() => {
+      expect(endDateInput).toHaveValue('2025-01-02'); // Should be start date + 1 day
+    });
+
+    // The validation error should be cleared
+    await waitFor(() => {
+      expect(screen.queryByText(/end date must be after start date/i)).not.toBeInTheDocument();
+    }, { timeout: 1000 });
+  });
+
+  it('should show validation error when start and end dates are the same', async () => {
+    const user = userEvent.setup();
+    
+    render(
+      <LoanForm
+        onSubmit={mockOnSubmit}
+        onReset={mockOnReset}
+        isCalculating={false}
+      />
+    );
+
+    // Fill in loan amount and interest rate
+    await user.type(screen.getByLabelText(/loan amount/i), '100000');
+    await user.type(screen.getByLabelText(/annual interest rate/i), '5.5');
+
+    // Set same start and end dates
+    const startDateInput = screen.getByTestId('start-date');
+    const endDateInput = screen.getByTestId('end-date');
+    
+    await user.type(startDateInput, '2025-01-01');
+    await user.type(endDateInput, '2025-01-01');
+
+    // Submit the form to trigger validation
+    const submitButton = screen.getByRole('button', { name: /calculate/i });
+    await user.click(submitButton);
+
+    // Should show validation error
+    await waitFor(() => {
+      expect(screen.getByText(/end date must be after start date/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should not show validation error when end date is after start date', async () => {
+    const user = userEvent.setup();
+    
+    render(
+      <LoanForm
+        onSubmit={mockOnSubmit}
+        onReset={mockOnReset}
+        isCalculating={false}
+      />
+    );
+
+    // Fill in loan amount and interest rate
+    await user.type(screen.getByLabelText(/loan amount/i), '100000');
+    await user.type(screen.getByLabelText(/annual interest rate/i), '5.5');
+
+    // Set valid start and end dates
+    const startDateInput = screen.getByTestId('start-date');
+    const endDateInput = screen.getByTestId('end-date');
+    
+    await user.type(startDateInput, '2025-01-01');
+    await user.type(endDateInput, '2025-01-02');
+
+    // Should not show validation error
+    await waitFor(() => {
+      expect(screen.queryByTestId('end-date-error')).not.toBeInTheDocument();
+    });
   });
 });

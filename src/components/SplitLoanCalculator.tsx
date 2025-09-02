@@ -1,18 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useCalculatorManager } from '@/hooks/useCalculatorManager';
 import {
-  Calculator,
-  Split,
-  CreditCard,
-  Calendar,
-  TrendingUp,
-} from 'lucide-react';
-
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-
+  CalculatorSelector,
+  CalculatorForm,
+  CalculatorResults,
+} from '@/components/calculator';
 import {
   FormData,
   SplitLoanFormData,
@@ -26,17 +20,6 @@ import {
   calculateFixedRateLoan,
 } from '@/lib/helper/loanCalculations';
 import {
-  LoanForm,
-  LoanResults as LoanResultsComponent,
-  SplitLoanForm,
-  SplitLoanResults as SplitLoanResultsComponent,
-  FixedPeriodForm,
-  FixedPeriodResults,
-  FixedRateLoanForm,
-  FixedRateLoanResults,
-} from '@/components/loan';
-import {
-  CalculatorType,
   LoanResults,
   SplitLoanResults,
   FixedPeriodResults as FixedPeriodResultsType,
@@ -44,8 +27,9 @@ import {
 } from '@/types/loan';
 
 export default function SplitLoanCalculator() {
-  const [calculatorType, setCalculatorType] =
-    useState<CalculatorType>('single');
+  const { calculatorType, switchCalculatorType } = useCalculatorManager();
+
+  // Results state
   const [singleResults, setSingleResults] = useState<LoanResults | null>(null);
   const [splitResults, setSplitResults] = useState<SplitLoanResults | null>(
     null
@@ -56,9 +40,9 @@ export default function SplitLoanCalculator() {
     useState<FixedRateLoanResultsType | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
+  // Calculation handlers
   const handleSingleLoanCalculation = async (data: FormData) => {
     setIsCalculating(true);
-
     try {
       const results = await calculateLoan(data);
       setSingleResults(results);
@@ -71,7 +55,6 @@ export default function SplitLoanCalculator() {
 
   const handleSplitLoanCalculation = async (data: SplitLoanFormData) => {
     setIsCalculating(true);
-
     try {
       const results = await calculateSplitLoan(data);
       setSplitResults(results);
@@ -86,7 +69,6 @@ export default function SplitLoanCalculator() {
     data: FixedPeriodLoanData & { futureRate?: string }
   ) => {
     setIsCalculating(true);
-
     try {
       const results = await calculateFixedPeriodLoan(data, data.futureRate);
       setFixedPeriodResults(results);
@@ -99,7 +81,6 @@ export default function SplitLoanCalculator() {
 
   const handleFixedRateCalculation = async (data: FixedRateLoanFormData) => {
     setIsCalculating(true);
-
     try {
       const results = await calculateFixedRateLoan(data);
       setFixedRateResults(results);
@@ -110,208 +91,129 @@ export default function SplitLoanCalculator() {
     }
   };
 
-  const handleSingleReset = () => {
-    setSingleResults(null);
+  // Reset handlers
+  const handleSingleReset = () => setSingleResults(null);
+  const handleSplitReset = () => setSplitResults(null);
+  const handleFixedPeriodReset = () => setFixedPeriodResults(null);
+  const handleFixedRateReset = () => setFixedRateResults(null);
+
+  // Get current results and handler
+  const getCurrentResults = () => {
+    switch (calculatorType) {
+      case 'single':
+        return singleResults;
+      case 'split':
+        return splitResults;
+      case 'fixed-period':
+        return fixedPeriodResults;
+      case 'fixed-rate':
+        return fixedRateResults;
+      default:
+        return null;
+    }
   };
 
-  const handleSplitReset = () => {
-    setSplitResults(null);
+  const getCurrentHandler = () => {
+    switch (calculatorType) {
+      case 'single':
+        return handleSingleLoanCalculation;
+      case 'split':
+        return handleSplitLoanCalculation;
+      case 'fixed-period':
+        return handleFixedPeriodCalculation;
+      case 'fixed-rate':
+        return handleFixedRateCalculation;
+      default:
+        return () => {};
+    }
   };
 
-  const handleFixedPeriodReset = () => {
-    setFixedPeriodResults(null);
-  };
-
-  const handleFixedRateReset = () => {
-    setFixedRateResults(null);
-  };
-
-  const switchCalculatorType = (type: CalculatorType) => {
-    setCalculatorType(type);
-    // Don't reset form data when switching - only clear results
-    setSingleResults(null);
-    setSplitResults(null);
-    setFixedPeriodResults(null);
-    setFixedRateResults(null);
+  const getCurrentResetHandler = () => {
+    switch (calculatorType) {
+      case 'single':
+        return handleSingleReset;
+      case 'split':
+        return handleSplitReset;
+      case 'fixed-period':
+        return handleFixedPeriodReset;
+      case 'fixed-rate':
+        return handleFixedRateReset;
+      default:
+        return () => {};
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+      <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <div className="flex justify-center mb-6">
-            <div className="p-4 bg-blue-500 rounded-full">
-              <Calculator className="h-8 w-8 text-white" />
-            </div>
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">
             Advanced Loan Calculator
           </h1>
-          <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto mb-8">
-            Calculate payments for single loans, split loans, or fixed period
-            loans with realistic rate change scenarios
+          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            Calculate loan payments, compare different scenarios, and make
+            informed financial decisions with our comprehensive loan calculator
+            suite.
           </p>
+        </div>
 
-          {/* Calculator Type Selector */}
-          <div className="flex justify-center gap-4">
-            <Button
-              variant={calculatorType === 'single' ? 'default' : 'outline'}
-              onClick={() => switchCalculatorType('single')}
-              className="flex items-center gap-2"
-            >
-              <CreditCard className="h-4 w-4" />
-              Single Loan
-              <Badge variant="secondary" className="ml-2">
-                Simple
-              </Badge>
-            </Button>
-            <Button
-              variant={calculatorType === 'split' ? 'default' : 'outline'}
-              onClick={() => switchCalculatorType('split')}
-              className="flex items-center gap-2"
-            >
-              <Split className="h-4 w-4" />
-              Split Loan
-              <Badge variant="secondary" className="ml-2">
-                Advanced
-              </Badge>
-            </Button>
-            <Button
-              variant={
-                calculatorType === 'fixed-period' ? 'default' : 'outline'
-              }
-              onClick={() => switchCalculatorType('fixed-period')}
-              className="flex items-center gap-2"
-            >
-              <Calendar className="h-4 w-4" />
-              Fixed Period
-              <Badge variant="secondary" className="ml-2">
-                Realistic
-              </Badge>
-            </Button>
-            <Button
-              variant={calculatorType === 'fixed-rate' ? 'default' : 'outline'}
-              onClick={() => switchCalculatorType('fixed-rate')}
-              className="flex items-center gap-2"
-            >
-              <TrendingUp className="h-4 w-4" />
-              Fixed Rate
-              <Badge variant="secondary" className="ml-2">
-                Multi-Rate
-              </Badge>
-            </Button>
-          </div>
-        </motion.div>
+        {/* Calculator Selector */}
+        <CalculatorSelector
+          calculatorType={calculatorType}
+          onCalculatorChange={switchCalculatorType}
+        />
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Form Section */}
-          <div>
-            {/* Single Loan Form */}
-            <div className={calculatorType === 'single' ? 'block' : 'hidden'}>
-              <LoanForm
-                onSubmit={handleSingleLoanCalculation}
-                onReset={handleSingleReset}
-                isCalculating={isCalculating && calculatorType === 'single'}
-              />
-            </div>
+        {/* Calculator Form and Results */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <CalculatorForm
+            calculatorType={calculatorType}
+            onSubmit={getCurrentHandler()}
+            onReset={getCurrentResetHandler()}
+            isCalculating={isCalculating}
+          />
 
-            {/* Split Loan Form */}
-            <div className={calculatorType === 'split' ? 'block' : 'hidden'}>
-              <SplitLoanForm
-                onSubmit={handleSplitLoanCalculation}
-                onReset={handleSplitReset}
-                isCalculating={isCalculating && calculatorType === 'split'}
-              />
-            </div>
-
-            {/* Fixed Period Form */}
-            <div
-              className={calculatorType === 'fixed-period' ? 'block' : 'hidden'}
-            >
-              <FixedPeriodForm
-                onSubmit={handleFixedPeriodCalculation}
-                onReset={handleFixedPeriodReset}
-                isCalculating={
-                  isCalculating && calculatorType === 'fixed-period'
-                }
-              />
-            </div>
-
-            {/* Fixed Rate Form */}
-            <div
-              className={calculatorType === 'fixed-rate' ? 'block' : 'hidden'}
-            >
-              <FixedRateLoanForm
-                onSubmit={handleFixedRateCalculation}
-                onReset={handleFixedRateReset}
-                isCalculating={isCalculating && calculatorType === 'fixed-rate'}
-              />
-            </div>
-          </div>
-
-          {/* Results Section */}
-          <div>
-            {calculatorType === 'single' ? (
-              <LoanResultsComponent results={singleResults} />
-            ) : calculatorType === 'split' ? (
-              <SplitLoanResultsComponent results={splitResults} />
-            ) : calculatorType === 'fixed-period' ? (
-              <FixedPeriodResults results={fixedPeriodResults} />
-            ) : (
-              <FixedRateLoanResults results={fixedRateResults} />
-            )}
-          </div>
+          <CalculatorResults
+            calculatorType={calculatorType}
+            results={getCurrentResults()}
+          />
         </div>
 
         {/* Features Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-16 text-center"
-        >
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            <div className="p-6 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
-              <CreditCard className="h-8 w-8 text-blue-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Single Loan</h3>
-              <p className="text-slate-600 dark:text-slate-300 text-sm">
-                Traditional loan calculation with one amount, interest rate, and
-                term. Perfect for mortgages, personal loans, or auto financing.
+        <div className="mt-16 text-center">
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-6">
+            Why Choose Our Loan Calculator?
+          </h2>
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="p-6 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                Multiple Calculator Types
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                From simple single loans to complex split loans and fixed-rate
+                periods.
               </p>
             </div>
-            <div className="p-6 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
-              <Split className="h-8 w-8 text-blue-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Split Loan</h3>
-              <p className="text-slate-600 dark:text-slate-300 text-sm">
-                Break your loan into multiple tranches with different amounts,
-                rates, and terms. Ideal for complex financing scenarios.
+            <div className="p-6 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                Real-time Calculations
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Get instant results with detailed payment schedules and
+                amortization tables.
               </p>
             </div>
-            <div className="p-6 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
-              <Calendar className="h-8 w-8 text-blue-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Fixed Period</h3>
-              <p className="text-slate-600 dark:text-slate-300 text-sm">
-                Calculate payments for loans with known fixed rates for specific
-                periods. Perfect for adjustable-rate mortgages and rate change
-                planning.
-              </p>
-            </div>
-            <div className="p-6 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
-              <TrendingUp className="h-8 w-8 text-blue-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Fixed Rate</h3>
-              <p className="text-slate-600 dark:text-slate-300 text-sm">
-                Calculate payments for loans with multiple fixed rate periods.
-                Perfect for planning different interest rates over time.
+            <div className="p-6 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                Mobile Friendly
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Responsive design that works perfectly on all devices and screen
+                sizes.
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

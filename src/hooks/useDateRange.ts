@@ -3,7 +3,6 @@ import { DateRangeProps } from '@/types/common';
 import {
   calculatePeriodBetween,
   addPeriodToDate,
-  isEndDateAfterStartDate,
 } from '@/lib/helper/dateCalculations';
 import {
   validateDateRange,
@@ -20,13 +19,17 @@ export function useDateRange({
   endDate,
   period,
   periodType,
-}: Pick<DateRangeProps, 'startDate' | 'endDate' | 'period' | 'periodType'>) {
+  onValidationTrigger,
+}: Pick<DateRangeProps, 'startDate' | 'endDate' | 'period' | 'periodType'> & {
+  onValidationTrigger?: () => void;
+}) {
   // Local error state for date validation
   const [dateErrors, setDateErrors] = useState<DateValidationErrors>({});
 
   // Handle start date change
   const handleStartDateChange = useCallback(
     (value: string) => {
+      // Always call the parent's onChange first to ensure form state is updated
       startDate.onChange(value);
 
       // If we have start date and period, always calculate end date
@@ -62,6 +65,7 @@ export function useDateRange({
   // Handle end date change
   const handleEndDateChange = useCallback(
     (value: string) => {
+      // Always call the parent's onChange first to ensure form state is updated
       endDate.onChange(value);
 
       // Validate that end date is after start date
@@ -111,6 +115,7 @@ export function useDateRange({
     (value: string) => {
       if (!period) return;
 
+      // Always call the parent's onChange first to ensure form state is updated
       period.onChange(value);
 
       // If period is changed, always recalculate end date
@@ -123,10 +128,18 @@ export function useDateRange({
             periodType.value
           );
           endDate.onChange(calculatedEndDate);
+
+          // Clear date validation errors since we have a valid calculated date range
+          setDateErrors(clearAllErrors());
+
+          // Trigger validation after end date is updated
+          if (onValidationTrigger) {
+            setTimeout(() => onValidationTrigger(), 0);
+          }
         }
       }
     },
-    [startDate, endDate, period, periodType]
+    [startDate, endDate, period, periodType, onValidationTrigger]
   );
 
   // Handle period type change
@@ -134,6 +147,7 @@ export function useDateRange({
     (value: 'days' | 'months' | 'years') => {
       if (!periodType) return;
 
+      // Always call the parent's onChange first to ensure form state is updated
       periodType.onChange(value);
 
       // If we have start date and period, recalculate end date with new type
@@ -146,6 +160,8 @@ export function useDateRange({
             value
           );
           endDate.onChange(calculatedEndDate);
+          // Clear date validation errors since we have a valid calculated date range
+          setDateErrors(clearAllErrors());
         }
       }
 
