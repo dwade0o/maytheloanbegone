@@ -187,7 +187,8 @@ describe('FormField', () => {
       const input = screen.getByTestId('form-input');
       await user.type(input, 'test input');
 
-      expect(mockOnChange).toHaveBeenCalledWith('test input');
+      // user.type calls onChange for each character, so we check the last call
+      expect(mockOnChange).toHaveBeenLastCalledWith('test input');
     });
 
     it('calls onChange with input value', async () => {
@@ -199,7 +200,8 @@ describe('FormField', () => {
       const input = screen.getByTestId('form-input');
       await user.type(input, 'hello world');
 
-      expect(mockOnChange).toHaveBeenCalledWith('hello world');
+      // user.type calls onChange for each character, so we check the last call
+      expect(mockOnChange).toHaveBeenLastCalledWith('hello world');
     });
   });
 
