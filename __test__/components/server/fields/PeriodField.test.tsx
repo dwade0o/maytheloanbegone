@@ -82,8 +82,11 @@ jest.mock('@/components/client/ui/select', () => ({
           onChange={e => onValueChange(e.target.value)}
           data-testid="select-element"
         >
-          {children}
+          <option value="days">Days</option>
+          <option value="months">Months</option>
+          <option value="years">Years</option>
         </select>
+        {children}
       </div>
     );
   },
