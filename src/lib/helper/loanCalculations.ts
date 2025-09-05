@@ -420,6 +420,35 @@ export const calculateFixedRateLoan = async (
     }
 
     const totalPayment = monthlyPrincipal * periodMonths + totalInterest;
+    const monthlyPayment = totalPayment / periodMonths;
+
+    // Calculate weekly and fortnightly payments
+    const weeklyRate = annualRate / 52;
+    const fortnightlyRate = annualRate / 26;
+    const totalWeeks = periodMonths * (52 / 12);
+    const totalFortnights = periodMonths * (26 / 12);
+
+    // Calculate weekly payment
+    let weeklyPayment: number;
+    if (weeklyRate === 0) {
+      weeklyPayment = monthlyPrincipal / (52 / 12);
+    } else {
+      weeklyPayment =
+        (monthlyPrincipal *
+          (weeklyRate * Math.pow(1 + weeklyRate, totalWeeks))) /
+        (Math.pow(1 + weeklyRate, totalWeeks) - 1);
+    }
+
+    // Calculate fortnightly payment
+    let fortnightlyPayment: number;
+    if (fortnightlyRate === 0) {
+      fortnightlyPayment = monthlyPrincipal / (26 / 12);
+    } else {
+      fortnightlyPayment =
+        (monthlyPrincipal *
+          (fortnightlyRate * Math.pow(1 + fortnightlyRate, totalFortnights))) /
+        (Math.pow(1 + fortnightlyRate, totalFortnights) - 1);
+    }
 
     return {
       id: period.id,
@@ -428,7 +457,9 @@ export const calculateFixedRateLoan = async (
       endDate: period.endDate,
       months: periodMonths,
       interestRate: annualRate * 100,
-      monthlyPayment: totalPayment / periodMonths,
+      monthlyPayment,
+      weeklyPayment,
+      fortnightlyPayment,
       totalPayment,
       totalInterest,
       principalPaid: monthlyPrincipal * periodMonths,
@@ -450,6 +481,8 @@ export const calculateFixedRateLoan = async (
     0
   );
   const averageMonthlyPayment = totalPayment / totalMonthsCovered;
+  const averageWeeklyPayment = averageMonthlyPayment * (12 / 52);
+  const averageFortnightlyPayment = averageMonthlyPayment * (12 / 26);
   const coveragePercentage = (totalMonthsCovered / totalLoanTermMonths) * 100;
 
   return {
@@ -462,6 +495,8 @@ export const calculateFixedRateLoan = async (
       totalPayment,
       totalInterest,
       averageMonthlyPayment,
+      averageWeeklyPayment,
+      averageFortnightlyPayment,
       coveragePercentage,
       monthsCovered: totalMonthsCovered,
     },

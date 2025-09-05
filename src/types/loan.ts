@@ -105,6 +105,8 @@ export interface FixedRateLoanResults {
     months: number;
     interestRate: number;
     monthlyPayment: number;
+    weeklyPayment: number;
+    fortnightlyPayment: number;
     totalPayment: number;
     totalInterest: number;
     principalPaid: number;
@@ -120,6 +122,8 @@ export interface FixedRateLoanResults {
     totalPayment: number;
     totalInterest: number;
     averageMonthlyPayment: number;
+    averageWeeklyPayment: number;
+    averageFortnightlyPayment: number;
     coveragePercentage: number;
     monthsCovered: number;
   };
