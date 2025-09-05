@@ -1,5 +1,5 @@
-import SplitLoanCalculator from '@/components/SplitLoanCalculatorWrapper';
+import LoanCalculatorWrapper from '@/components/client/calculators/SplitLoanCalculatorWrapper';
 
 export default function Home() {
-  return <SplitLoanCalculator />;
+  return <LoanCalculatorWrapper />;
 }
