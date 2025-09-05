@@ -30,8 +30,6 @@ export default function CalculatorResults({
   results,
 }: CalculatorResultsProps) {
   const renderResults = () => {
-    if (!results) return null;
-
     switch (calculatorType) {
       case 'single':
         return <LoanResultsComponent results={results as LoanResults} />;
