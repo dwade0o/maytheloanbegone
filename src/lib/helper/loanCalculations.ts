@@ -20,6 +20,8 @@ export const calculateLoan = async (data: FormData): Promise<LoanResults> => {
   const principal = parseFloat(data.loanAmount);
   const annualRate = parseFloat(data.interestRate) / 100;
   const monthlyRate = annualRate / 12;
+  const weeklyRate = annualRate / 52;
+  const fortnightlyRate = annualRate / 26;
 
   const startDate = new Date(data.startDate);
   const endDate = new Date(data.endDate);
@@ -34,10 +36,13 @@ export const calculateLoan = async (data: FormData): Promise<LoanResults> => {
     totalMonths += daysDiff / 30; // Approximate additional days as fraction of month
   }
 
+  // Calculate total periods for each frequency
+  const totalWeeks = totalMonths * (52 / 12); // Approximate weeks in months
+  const totalFortnights = totalMonths * (26 / 12); // Approximate fortnights in months
+
   // Monthly payment calculation using standard loan formula
   let monthlyPayment: number;
   if (monthlyRate === 0) {
-    // No interest case
     monthlyPayment = principal / totalMonths;
   } else {
     monthlyPayment =
@@ -45,11 +50,34 @@ export const calculateLoan = async (data: FormData): Promise<LoanResults> => {
       (Math.pow(1 + monthlyRate, totalMonths) - 1);
   }
 
+  // Weekly payment calculation
+  let weeklyPayment: number;
+  if (weeklyRate === 0) {
+    weeklyPayment = principal / totalWeeks;
+  } else {
+    weeklyPayment =
+      (principal * (weeklyRate * Math.pow(1 + weeklyRate, totalWeeks))) /
+      (Math.pow(1 + weeklyRate, totalWeeks) - 1);
+  }
+
+  // Fortnightly payment calculation
+  let fortnightlyPayment: number;
+  if (fortnightlyRate === 0) {
+    fortnightlyPayment = principal / totalFortnights;
+  } else {
+    fortnightlyPayment =
+      (principal *
+        (fortnightlyRate * Math.pow(1 + fortnightlyRate, totalFortnights))) /
+      (Math.pow(1 + fortnightlyRate, totalFortnights) - 1);
+  }
+
   const totalPayment = monthlyPayment * totalMonths;
   const totalInterest = totalPayment - principal;
 
   return {
     monthlyPayment,
+    weeklyPayment,
+    fortnightlyPayment,
     totalPayment,
     totalInterest,
     loanTermMonths: Math.round(totalMonths),
@@ -62,6 +90,8 @@ export const calculateLoanTranche = async (
   const principal = parseFloat(tranche.amount);
   const annualRate = parseFloat(tranche.interestRate) / 100;
   const monthlyRate = annualRate / 12;
+  const weeklyRate = annualRate / 52;
+  const fortnightlyRate = annualRate / 26;
 
   const startDate = new Date(tranche.startDate);
   const endDate = new Date(tranche.endDate);
@@ -76,15 +106,39 @@ export const calculateLoanTranche = async (
     totalMonths += daysDiff / 30; // Approximate additional days as fraction of month
   }
 
+  // Calculate total periods for each frequency
+  const totalWeeks = totalMonths * (52 / 12);
+  const totalFortnights = totalMonths * (26 / 12);
+
   // Monthly payment calculation using standard loan formula
   let monthlyPayment: number;
   if (monthlyRate === 0) {
-    // No interest case
     monthlyPayment = principal / totalMonths;
   } else {
     monthlyPayment =
       (principal * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths))) /
       (Math.pow(1 + monthlyRate, totalMonths) - 1);
+  }
+
+  // Weekly payment calculation
+  let weeklyPayment: number;
+  if (weeklyRate === 0) {
+    weeklyPayment = principal / totalWeeks;
+  } else {
+    weeklyPayment =
+      (principal * (weeklyRate * Math.pow(1 + weeklyRate, totalWeeks))) /
+      (Math.pow(1 + weeklyRate, totalWeeks) - 1);
+  }
+
+  // Fortnightly payment calculation
+  let fortnightlyPayment: number;
+  if (fortnightlyRate === 0) {
+    fortnightlyPayment = principal / totalFortnights;
+  } else {
+    fortnightlyPayment =
+      (principal *
+        (fortnightlyRate * Math.pow(1 + fortnightlyRate, totalFortnights))) /
+      (Math.pow(1 + fortnightlyRate, totalFortnights) - 1);
   }
 
   const totalPayment = monthlyPayment * totalMonths;
@@ -95,6 +149,8 @@ export const calculateLoanTranche = async (
     label: tranche.label,
     principal,
     monthlyPayment,
+    weeklyPayment,
+    fortnightlyPayment,
     totalPayment,
     totalInterest,
     loanTermMonths: Math.round(totalMonths),
@@ -139,6 +195,8 @@ export const calculateSplitLoan = async (
   return {
     combined: {
       monthlyPayment: totalMonthlyPayment,
+      weeklyPayment: totalMonthlyPayment * (12 / 52), // Approximate weekly payment
+      fortnightlyPayment: totalMonthlyPayment * (12 / 26), // Approximate fortnightly payment
       totalPayment,
       totalInterest,
       loanTermMonths: averageLoanTermMonths,

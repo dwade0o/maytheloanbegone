@@ -37,6 +37,8 @@ describe('loanCalculations', () => {
       const result = await promise;
 
       expect(result).toHaveProperty('monthlyPayment');
+      expect(result).toHaveProperty('weeklyPayment');
+      expect(result).toHaveProperty('fortnightlyPayment');
       expect(result).toHaveProperty('totalPayment');
       expect(result).toHaveProperty('totalInterest');
       expect(result).toHaveProperty('loanTermMonths');
@@ -44,14 +46,41 @@ describe('loanCalculations', () => {
       // Should have 6 years = 72 months
       expect(result.loanTermMonths).toBe(72);
 
-      // Monthly payment should be positive
+      // All payment amounts should be positive
       expect(result.monthlyPayment).toBeGreaterThan(0);
+      expect(result.weeklyPayment).toBeGreaterThan(0);
+      expect(result.fortnightlyPayment).toBeGreaterThan(0);
 
       // Total payment should be greater than principal
       expect(result.totalPayment).toBeGreaterThan(100000);
 
       // Total interest should be positive
       expect(result.totalInterest).toBeGreaterThan(0);
+    });
+
+    it('calculates payment frequencies with correct relationships', async () => {
+      const promise = calculateLoan(mockFormData);
+      jest.runAllTimers();
+      const result = await promise;
+
+      // All payment amounts should be positive
+      expect(result.weeklyPayment).toBeGreaterThan(0);
+      expect(result.fortnightlyPayment).toBeGreaterThan(0);
+
+      // Weekly should be smaller than fortnightly
+      expect(result.weeklyPayment).toBeLessThan(result.fortnightlyPayment);
+
+      // Fortnightly should be smaller than monthly
+      expect(result.fortnightlyPayment).toBeLessThan(result.monthlyPayment);
+
+      // The relationships should be reasonable (not exact due to compound interest)
+      // Weekly should be roughly 1/4 of monthly
+      expect(result.weeklyPayment).toBeLessThan(result.monthlyPayment / 4);
+      expect(result.weeklyPayment).toBeGreaterThan(result.monthlyPayment / 5);
+
+      // Fortnightly should be roughly 1/2 of monthly
+      expect(result.fortnightlyPayment).toBeLessThan(result.monthlyPayment / 2);
+      expect(result.fortnightlyPayment).toBeGreaterThan(result.monthlyPayment / 3);
     });
 
     it('calculates loan with zero interest correctly', async () => {

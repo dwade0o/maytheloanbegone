@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { BarChart3 } from 'lucide-react';
+import { useState } from 'react';
 
 import { Badge } from '@/components/client/ui/badge';
 import {
@@ -14,10 +15,39 @@ import { SplitLoanResultsProps } from '@/types/common';
 import LoanResultsBase from '@/components/shared/LoanResultsBase';
 import FeaturedResult from '@/components/shared/FeaturedResult';
 import ResultRow from '@/components/shared/ResultRow';
+import PaymentFrequencySelector, {
+  PaymentFrequency,
+} from '@/components/shared/PaymentFrequencySelector';
 
 export default function SplitLoanResultsComponent({
   results,
 }: SplitLoanResultsProps) {
+  const [selectedFrequency, setSelectedFrequency] =
+    useState<PaymentFrequency>('monthly');
+
+  const getCombinedPaymentAmount = () => {
+    if (!results) return 0;
+    switch (selectedFrequency) {
+      case 'weekly':
+        return results.combined.weeklyPayment;
+      case 'fortnightly':
+        return results.combined.fortnightlyPayment;
+      default:
+        return results.combined.monthlyPayment;
+    }
+  };
+
+  const getCombinedPaymentLabel = () => {
+    switch (selectedFrequency) {
+      case 'weekly':
+        return 'Total Weekly Payment';
+      case 'fortnightly':
+        return 'Total Fortnightly Payment';
+      default:
+        return 'Total Monthly Payment';
+    }
+  };
+
   return (
     <LoanResultsBase
       title="Split Loan Results"
@@ -28,11 +58,16 @@ export default function SplitLoanResultsComponent({
     >
       {results && (
         <>
+          <PaymentFrequencySelector
+            selectedFrequency={selectedFrequency}
+            onFrequencyChange={setSelectedFrequency}
+          />
+
           {/* Combined Summary */}
           <div className="space-y-4">
             <FeaturedResult
-              label="Total Monthly Payment"
-              value={formatCurrency(results.combined.monthlyPayment)}
+              label={getCombinedPaymentLabel()}
+              value={formatCurrency(getCombinedPaymentAmount())}
               subtitle={`Across ${results.tranches.length} tranche${results.tranches.length > 1 ? 's' : ''}`}
             />
 

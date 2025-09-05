@@ -1,12 +1,42 @@
 import { TrendingUp } from 'lucide-react';
+import { useState } from 'react';
 
 import { formatCurrency } from '@/lib/helper/loanCalculations';
 import { LoanResultsProps } from '@/types/common';
 import LoanResultsBase from '@/components/shared/LoanResultsBase';
 import FeaturedResult from '@/components/shared/FeaturedResult';
 import ResultRow from '@/components/shared/ResultRow';
+import PaymentFrequencySelector, {
+  PaymentFrequency,
+} from '@/components/shared/PaymentFrequencySelector';
 
 export default function LoanResults({ results }: LoanResultsProps) {
+  const [selectedFrequency, setSelectedFrequency] =
+    useState<PaymentFrequency>('monthly');
+
+  const getPaymentAmount = () => {
+    if (!results) return 0;
+    switch (selectedFrequency) {
+      case 'weekly':
+        return results.weeklyPayment;
+      case 'fortnightly':
+        return results.fortnightlyPayment;
+      default:
+        return results.monthlyPayment;
+    }
+  };
+
+  const getPaymentLabel = () => {
+    switch (selectedFrequency) {
+      case 'weekly':
+        return 'Weekly Payment';
+      case 'fortnightly':
+        return 'Fortnightly Payment';
+      default:
+        return 'Monthly Payment';
+    }
+  };
+
   return (
     <LoanResultsBase
       title="Calculation Results"
@@ -17,9 +47,14 @@ export default function LoanResults({ results }: LoanResultsProps) {
     >
       {results && (
         <>
+          <PaymentFrequencySelector
+            selectedFrequency={selectedFrequency}
+            onFrequencyChange={setSelectedFrequency}
+          />
+
           <FeaturedResult
-            label="Monthly Payment"
-            value={formatCurrency(results.monthlyPayment)}
+            label={getPaymentLabel()}
+            value={formatCurrency(getPaymentAmount())}
           />
 
           <div className="space-y-4">

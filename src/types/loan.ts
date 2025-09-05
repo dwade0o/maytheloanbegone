@@ -1,6 +1,8 @@
 // Loan-related type definitions
 export interface LoanResults {
   monthlyPayment: number;
+  weeklyPayment: number;
+  fortnightlyPayment: number;
   totalPayment: number;
   totalInterest: number;
   loanTermMonths: number;
