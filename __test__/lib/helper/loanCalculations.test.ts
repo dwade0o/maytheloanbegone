@@ -3,6 +3,7 @@ import {
   calculateLoanTranche,
   calculateSplitLoan,
   calculateFixedPeriodLoan,
+  calculateFixedRateLoan,
   formatCurrency,
 } from '@/lib/helper/loanCalculations';
 import {
@@ -10,6 +11,7 @@ import {
   SplitLoanFormData,
   LoanTranche,
   FixedPeriodLoanData,
+  FixedRateLoanFormData,
 } from '@/constants/loanSchema';
 
 // Mock setTimeout to avoid delays in tests
@@ -379,6 +381,279 @@ describe('loanCalculations', () => {
         expectedRemainingBalance,
         2
       );
+    });
+  });
+
+  describe('calculateFixedRateLoan', () => {
+    const mockFixedRateLoanData: FixedRateLoanFormData = {
+      loanType: 'fixed-rate',
+      loanAmount: '1100000',
+      loanStartDate: '2021-09-08',
+      loanEndDate: '2051-09-08',
+      loanPeriod: '30',
+      loanPeriodType: 'years',
+      fixedRatePeriods: [
+        {
+          id: '1',
+          interestRate: '2.75',
+          startDate: '2021-09-08',
+          endDate: '2022-09-08',
+          label: 'Period 1',
+        },
+        {
+          id: '2',
+          interestRate: '3.25',
+          startDate: '2022-09-08',
+          endDate: '2023-09-08',
+          label: 'Period 2',
+        },
+      ],
+    };
+
+    it('calculates fixed rate loan correctly', async () => {
+      const promise = calculateFixedRateLoan(mockFixedRateLoanData);
+      jest.runAllTimers();
+
+      const result = await promise;
+
+      expect(result).toHaveProperty('loanAmount');
+      expect(result).toHaveProperty('loanStartDate');
+      expect(result).toHaveProperty('loanEndDate');
+      expect(result).toHaveProperty('totalLoanTermMonths');
+      expect(result).toHaveProperty('periods');
+      expect(result).toHaveProperty('summary');
+
+      expect(result.loanAmount).toBe(1100000);
+      expect(result.loanStartDate).toBe('2021-09-08');
+      expect(result.loanEndDate).toBe('2051-09-08');
+      expect(result.totalLoanTermMonths).toBe(360); // 30 years
+      expect(result.periods).toHaveLength(2);
+    });
+
+    it('calculates individual periods correctly', async () => {
+      const promise = calculateFixedRateLoan(mockFixedRateLoanData);
+      jest.runAllTimers();
+
+      const result = await promise;
+
+      // Test first period
+      const period1 = result.periods[0];
+      expect(period1.id).toBe('1');
+      expect(period1.label).toBe('Period 1');
+      expect(period1.interestRate).toBe(2.75);
+      expect(period1.startDate).toBe('2021-09-08');
+      expect(period1.endDate).toBe('2022-09-08');
+      expect(period1.months).toBe(12); // 1 year
+      expect(period1.monthlyPayment).toBeGreaterThan(0);
+      expect(period1.weeklyPayment).toBeGreaterThan(0);
+      expect(period1.fortnightlyPayment).toBeGreaterThan(0);
+      expect(period1.totalPayment).toBeGreaterThan(0);
+      expect(period1.totalInterest).toBeGreaterThan(0);
+      expect(period1.principalPaid).toBeGreaterThan(0);
+
+      // Test second period
+      const period2 = result.periods[1];
+      expect(period2.id).toBe('2');
+      expect(period2.label).toBe('Period 2');
+      expect(period2.interestRate).toBe(3.25);
+      expect(period2.startDate).toBe('2022-09-08');
+      expect(period2.endDate).toBe('2023-09-08');
+      expect(period2.months).toBe(12); // 1 year
+      expect(period2.monthlyPayment).toBeGreaterThan(0);
+      expect(period2.weeklyPayment).toBeGreaterThan(0);
+      expect(period2.fortnightlyPayment).toBeGreaterThan(0);
+    });
+
+    it('calculates weekly and fortnightly payments with correct relationships', async () => {
+      const promise = calculateFixedRateLoan(mockFixedRateLoanData);
+      jest.runAllTimers();
+
+      const result = await promise;
+
+      result.periods.forEach(period => {
+        // Weekly should be smaller than fortnightly
+        expect(period.weeklyPayment).toBeLessThan(period.fortnightlyPayment);
+        
+        // Fortnightly should be smaller than monthly
+        expect(period.fortnightlyPayment).toBeLessThan(period.monthlyPayment);
+
+        // Weekly should be approximately 12/52 of monthly (0.2308)
+        const weeklyRatio = period.weeklyPayment / period.monthlyPayment;
+        expect(weeklyRatio).toBeCloseTo(12/52, 2);
+
+        // Fortnightly should be approximately 12/26 of monthly (0.4615)
+        const fortnightlyRatio = period.fortnightlyPayment / period.monthlyPayment;
+        expect(fortnightlyRatio).toBeCloseTo(12/26, 2);
+      });
+    });
+
+    it('calculates summary correctly', async () => {
+      const promise = calculateFixedRateLoan(mockFixedRateLoanData);
+      jest.runAllTimers();
+
+      const result = await promise;
+
+      expect(result.summary.totalPayment).toBeGreaterThan(0);
+      expect(result.summary.totalInterest).toBeGreaterThan(0);
+      expect(result.summary.averageMonthlyPayment).toBeGreaterThan(0);
+      expect(result.summary.averageWeeklyPayment).toBeGreaterThan(0);
+      expect(result.summary.averageFortnightlyPayment).toBeGreaterThan(0);
+      expect(result.summary.coveragePercentage).toBeGreaterThan(0);
+      expect(result.summary.monthsCovered).toBe(24); // 2 periods * 12 months each
+
+      // Average payments should have correct relationships
+      expect(result.summary.averageWeeklyPayment).toBeLessThan(result.summary.averageFortnightlyPayment);
+      expect(result.summary.averageFortnightlyPayment).toBeLessThan(result.summary.averageMonthlyPayment);
+
+      // Average weekly should be approximately 12/52 of average monthly
+      const avgWeeklyRatio = result.summary.averageWeeklyPayment / result.summary.averageMonthlyPayment;
+      expect(avgWeeklyRatio).toBeCloseTo(12/52, 2);
+
+      // Average fortnightly should be approximately 12/26 of average monthly
+      const avgFortnightlyRatio = result.summary.averageFortnightlyPayment / result.summary.averageMonthlyPayment;
+      expect(avgFortnightlyRatio).toBeCloseTo(12/26, 2);
+    });
+
+    it('handles single period correctly', async () => {
+      const singlePeriodData: FixedRateLoanFormData = {
+        ...mockFixedRateLoanData,
+        fixedRatePeriods: [mockFixedRateLoanData.fixedRatePeriods[0]],
+      };
+
+      const promise = calculateFixedRateLoan(singlePeriodData);
+      jest.runAllTimers();
+
+      const result = await promise;
+
+      expect(result.periods).toHaveLength(1);
+      expect(result.summary.monthsCovered).toBe(12);
+      expect(result.summary.coveragePercentage).toBeCloseTo(12/360 * 100, 1); // 12 months out of 360
+    });
+
+    it('calculates payment breakdown correctly', async () => {
+      const promise = calculateFixedRateLoan(mockFixedRateLoanData);
+      jest.runAllTimers();
+
+      const result = await promise;
+
+      result.periods.forEach(period => {
+        expect(period.paymentBreakdown).toHaveLength(period.months);
+        
+        // Check first payment in breakdown
+        const firstPayment = period.paymentBreakdown[0];
+        expect(firstPayment.month).toBeGreaterThan(0);
+        expect(firstPayment.balance).toBeGreaterThan(0);
+        expect(firstPayment.principal).toBeGreaterThan(0);
+        expect(firstPayment.interest).toBeGreaterThan(0);
+        expect(firstPayment.totalPayment).toBe(firstPayment.principal + firstPayment.interest);
+      });
+    });
+
+    it('handles different interest rates correctly', async () => {
+      const highRateData: FixedRateLoanFormData = {
+        ...mockFixedRateLoanData,
+        fixedRatePeriods: [
+          {
+            id: '1',
+            interestRate: '8.5',
+            startDate: '2021-09-08',
+            endDate: '2022-09-08',
+            label: 'High Rate Period',
+          },
+        ],
+      };
+
+      const promise = calculateFixedRateLoan(highRateData);
+      jest.runAllTimers();
+
+      const result = await promise;
+
+      const period = result.periods[0];
+      expect(period.interestRate).toBe(8.5);
+      expect(period.monthlyPayment).toBeGreaterThan(0);
+      expect(period.totalInterest).toBeGreaterThan(0);
+      
+      // Higher interest rate should result in higher payments
+      expect(period.monthlyPayment).toBeGreaterThan(0);
+    });
+
+    it('handles zero interest rate correctly', async () => {
+      const zeroRateData: FixedRateLoanFormData = {
+        ...mockFixedRateLoanData,
+        fixedRatePeriods: [
+          {
+            id: '1',
+            interestRate: '0',
+            startDate: '2021-09-08',
+            endDate: '2022-09-08',
+            label: 'Zero Rate Period',
+          },
+        ],
+      };
+
+      const promise = calculateFixedRateLoan(zeroRateData);
+      jest.runAllTimers();
+
+      const result = await promise;
+
+      const period = result.periods[0];
+      expect(period.interestRate).toBe(0);
+      expect(period.totalInterest).toBe(0);
+      expect(period.monthlyPayment).toBeGreaterThan(0);
+      expect(period.weeklyPayment).toBeGreaterThan(0);
+      expect(period.fortnightlyPayment).toBeGreaterThan(0);
+    });
+
+    it('calculates coverage percentage correctly', async () => {
+      const partialCoverageData: FixedRateLoanFormData = {
+        ...mockFixedRateLoanData,
+        loanEndDate: '2025-09-08', // 4 years total
+        fixedRatePeriods: [
+          {
+            id: '1',
+            interestRate: '2.75',
+            startDate: '2021-09-08',
+            endDate: '2022-09-08',
+            label: 'Period 1',
+          },
+        ],
+      };
+
+      const promise = calculateFixedRateLoan(partialCoverageData);
+      jest.runAllTimers();
+
+      const result = await promise;
+
+      expect(result.totalLoanTermMonths).toBe(48); // 4 years
+      expect(result.summary.monthsCovered).toBe(12); // 1 year covered
+      expect(result.summary.coveragePercentage).toBeCloseTo(25, 1); // 12/48 * 100
+    });
+
+    it('handles edge case with very short period', async () => {
+      const shortPeriodData: FixedRateLoanFormData = {
+        ...mockFixedRateLoanData,
+        fixedRatePeriods: [
+          {
+            id: '1',
+            interestRate: '2.75',
+            startDate: '2021-09-08',
+            endDate: '2021-10-08', // 1 month
+            label: 'Short Period',
+          },
+        ],
+      };
+
+      const promise = calculateFixedRateLoan(shortPeriodData);
+      jest.runAllTimers();
+
+      const result = await promise;
+
+      const period = result.periods[0];
+      expect(period.months).toBe(1);
+      expect(period.monthlyPayment).toBeGreaterThan(0);
+      expect(period.weeklyPayment).toBeGreaterThan(0);
+      expect(period.fortnightlyPayment).toBeGreaterThan(0);
+      expect(period.paymentBreakdown).toHaveLength(1);
     });
   });
 

@@ -423,32 +423,9 @@ export const calculateFixedRateLoan = async (
     const monthlyPayment = totalPayment / periodMonths;
 
     // Calculate weekly and fortnightly payments
-    const weeklyRate = annualRate / 52;
-    const fortnightlyRate = annualRate / 26;
-    const totalWeeks = periodMonths * (52 / 12);
-    const totalFortnights = periodMonths * (26 / 12);
-
-    // Calculate weekly payment
-    let weeklyPayment: number;
-    if (weeklyRate === 0) {
-      weeklyPayment = monthlyPrincipal / (52 / 12);
-    } else {
-      weeklyPayment =
-        (monthlyPrincipal *
-          (weeklyRate * Math.pow(1 + weeklyRate, totalWeeks))) /
-        (Math.pow(1 + weeklyRate, totalWeeks) - 1);
-    }
-
-    // Calculate fortnightly payment
-    let fortnightlyPayment: number;
-    if (fortnightlyRate === 0) {
-      fortnightlyPayment = monthlyPrincipal / (26 / 12);
-    } else {
-      fortnightlyPayment =
-        (monthlyPrincipal *
-          (fortnightlyRate * Math.pow(1 + fortnightlyRate, totalFortnights))) /
-        (Math.pow(1 + fortnightlyRate, totalFortnights) - 1);
-    }
+    // These should be proportional to the monthly payment, not calculated separately
+    const weeklyPayment = monthlyPayment * (12 / 52);
+    const fortnightlyPayment = monthlyPayment * (12 / 26);
 
     return {
       id: period.id,
