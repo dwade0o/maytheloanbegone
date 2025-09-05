@@ -84,8 +84,11 @@ jest.mock('@/components/client/ui/select', () => ({
           onChange={e => onValueChange(e.target.value)}
           data-testid="select-trigger"
         >
-          {children}
+          <option value="days">Days</option>
+          <option value="months">Months</option>
+          <option value="years">Years</option>
         </select>
+        {children}
       </div>
     );
   },
@@ -498,7 +501,8 @@ describe('DateRange', () => {
       const periodInput = screen.getByTestId('date-input-period');
 
       expect(periodInput).toHaveAttribute('type', 'number');
-      expect(periodInput).toHaveAttribute('min', '1');
+      expect(periodInput).toHaveAttribute('min', '0.1');
+      expect(periodInput).toHaveAttribute('step', '0.1');
       expect(periodInput).toHaveAttribute('placeholder', 'Amount');
     });
 
