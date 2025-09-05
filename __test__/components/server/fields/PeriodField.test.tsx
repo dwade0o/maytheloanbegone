@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import PeriodField from '@/components/server/fields/PeriodField';
 
 // Mock the Clock icon
@@ -170,6 +171,30 @@ describe('PeriodField', () => {
     expect(screen.getByTestId('select')).toBeInTheDocument();
   });
 
+  it('accepts decimal values with step attribute', () => {
+    render(<PeriodField {...defaultProps} value="6.1" />);
+    const input = screen.getByRole('spinbutton');
+    
+    expect(input).toHaveValue(6.1);
+    expect(input).toHaveAttribute('step', '0.1');
+    expect(input).toHaveAttribute('min', '0.1');
+  });
+
+  it('allows decimal input without validation errors', async () => {
+    const onChangeMock = jest.fn();
+    
+    // Start with empty value to avoid default value issues
+    render(<PeriodField {...defaultProps} value="" onChange={onChangeMock} />);
+    const input = screen.getByRole('spinbutton');
+    
+    // Use fireEvent for more direct control over the input value
+    fireEvent.change(input, { target: { value: '6.1' } });
+    
+    // Check that the onChange was called with the decimal value
+    expect(onChangeMock).toHaveBeenCalledWith('6.1');
+    expect((input as HTMLInputElement).checkValidity()).toBe(true); // HTML5 validation should pass
+  });
+
   it('does not render period type selector when periodType is not provided', () => {
     render(<PeriodField {...defaultProps} />);
     expect(screen.queryByTestId('select')).not.toBeInTheDocument();
@@ -210,7 +235,8 @@ describe('PeriodField', () => {
     render(<PeriodField {...defaultProps} />);
     const input = screen.getByTestId('period-input-testPeriod');
     expect(input).toHaveAttribute('type', 'number');
-    expect(input).toHaveAttribute('min', '1');
+    expect(input).toHaveAttribute('min', '0.1');
+    expect(input).toHaveAttribute('step', '0.1');
     expect(input).toHaveAttribute('placeholder', 'Amount');
   });
 

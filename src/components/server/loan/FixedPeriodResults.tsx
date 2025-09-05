@@ -1,4 +1,5 @@
 import { TrendingUp, Calendar, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
 
 import { Badge } from '@/components/client/ui/badge';
 
@@ -7,6 +8,9 @@ import { formatCurrency } from '@/lib/helper/loanCalculations';
 import LoanResultsBase from '@/components/shared/LoanResultsBase';
 import FeaturedResult from '@/components/shared/FeaturedResult';
 import ResultRow from '@/components/shared/ResultRow';
+import PaymentFrequencySelector, {
+  PaymentFrequency,
+} from '@/components/shared/PaymentFrequencySelector';
 
 interface FixedPeriodResultsProps {
   results: FixedPeriodResults | null;
@@ -16,6 +20,32 @@ interface FixedPeriodResultsProps {
 export default function FixedPeriodResultsComponent({
   results,
 }: FixedPeriodResultsProps) {
+  const [selectedFrequency, setSelectedFrequency] =
+    useState<PaymentFrequency>('monthly');
+
+  const getPaymentAmount = () => {
+    if (!results) return 0;
+    switch (selectedFrequency) {
+      case 'weekly':
+        return results.totalPeriod.weeklyPayment;
+      case 'fortnightly':
+        return results.totalPeriod.fortnightlyPayment;
+      default:
+        return results.totalPeriod.monthlyPayment;
+    }
+  };
+
+  const getPaymentLabel = () => {
+    switch (selectedFrequency) {
+      case 'weekly':
+        return 'Weekly Payment';
+      case 'fortnightly':
+        return 'Fortnightly Payment';
+      default:
+        return 'Monthly Payment';
+    }
+  };
+
   return (
     <LoanResultsBase
       title="Fixed Period Results"
@@ -26,6 +56,18 @@ export default function FixedPeriodResultsComponent({
     >
       {results && (
         <>
+          <PaymentFrequencySelector
+            selectedFrequency={selectedFrequency}
+            onFrequencyChange={setSelectedFrequency}
+          />
+
+          <FeaturedResult
+            label={getPaymentLabel()}
+            value={formatCurrency(getPaymentAmount())}
+            subtitle={`Fixed payment for ${results.totalPeriod.months} months`}
+            gradient="from-blue-500 to-cyan-500"
+          />
+
           {/* Total Fixed Rate Period Results */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
@@ -44,7 +86,7 @@ export default function FixedPeriodResultsComponent({
             />
 
             <FeaturedResult
-              label="Monthly Interest (First Month)"
+              label={`${selectedFrequency === 'weekly' ? 'Weekly' : selectedFrequency === 'fortnightly' ? 'Fortnightly' : 'Monthly'} Interest (First Month)`}
               value={formatCurrency(
                 results.totalPeriod.paymentBreakdown[0]?.interest || 0
               )}
@@ -53,7 +95,7 @@ export default function FixedPeriodResultsComponent({
             />
 
             <FeaturedResult
-              label="Total Monthly Payment (First Month)"
+              label={`Total ${selectedFrequency === 'weekly' ? 'Weekly' : selectedFrequency === 'fortnightly' ? 'Fortnightly' : 'Monthly'} Payment (First Month)`}
               value={formatCurrency(
                 results.totalPeriod.paymentBreakdown[0]?.totalPayment || 0
               )}

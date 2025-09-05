@@ -19,11 +19,13 @@ export interface DateRangeProps {
     value: string;
     onChange: (value: string) => void;
     error?: FieldError;
+    disabled?: boolean;
   };
   endDate: {
     value: string;
     onChange: (value: string) => void;
     error?: FieldError;
+    disabled?: boolean;
   };
   period?: {
     value: string;
@@ -85,6 +87,7 @@ export interface FixedRatePeriodProps {
   onUpdate: (fieldName: keyof FixedRatePeriod, value: string) => void;
   onRemove: () => void;
   canRemove: boolean;
+  isStartDateDisabled?: boolean;
   errors?: {
     interestRate?: FieldError;
     startDate?: FieldError;

@@ -39,6 +39,7 @@ export default function DateRange({
         error={startDate.error?.message || dateErrors.startDate}
         showIcon={true}
         max={endDate.value}
+        disabled={startDate.disabled}
       />
 
       {/* End Date */}
@@ -49,6 +50,7 @@ export default function DateRange({
         onChange={handleEndDateChange}
         error={endDate.error?.message || dateErrors.endDate}
         min={startDate.value}
+        disabled={endDate.disabled}
       />
 
       {/* Period */}

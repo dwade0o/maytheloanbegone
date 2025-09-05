@@ -46,6 +46,9 @@ export interface FixedPeriodResults {
     startDate: string;
     endDate: string;
     months: number;
+    monthlyPayment: number;
+    weeklyPayment: number;
+    fortnightlyPayment: number;
     monthlyPrincipal: number;
     totalPaid: number;
     principalPaid: number;

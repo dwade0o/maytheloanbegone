@@ -26,15 +26,8 @@ export const calculateLoan = async (data: FormData): Promise<LoanResults> => {
   const startDate = new Date(data.startDate);
   const endDate = new Date(data.endDate);
 
-  // Calculate loan term in months
-  const yearsDiff = endDate.getFullYear() - startDate.getFullYear();
-  const monthsDiff = endDate.getMonth() - startDate.getMonth();
-  const daysDiff = endDate.getDate() - startDate.getDate();
-
-  let totalMonths = yearsDiff * 12 + monthsDiff;
-  if (daysDiff > 0) {
-    totalMonths += daysDiff / 30; // Approximate additional days as fraction of month
-  }
+  // Calculate loan term in months using improved precision
+  const totalMonths = calculateMonthsBetween(startDate, endDate);
 
   // Calculate total periods for each frequency
   const totalWeeks = totalMonths * (52 / 12); // Approximate weeks in months
@@ -96,15 +89,8 @@ export const calculateLoanTranche = async (
   const startDate = new Date(tranche.startDate);
   const endDate = new Date(tranche.endDate);
 
-  // Calculate loan term in months
-  const yearsDiff = endDate.getFullYear() - startDate.getFullYear();
-  const monthsDiff = endDate.getMonth() - startDate.getMonth();
-  const daysDiff = endDate.getDate() - startDate.getDate();
-
-  let totalMonths = yearsDiff * 12 + monthsDiff;
-  if (daysDiff > 0) {
-    totalMonths += daysDiff / 30; // Approximate additional days as fraction of month
-  }
+  // Calculate loan term in months using improved precision
+  const totalMonths = calculateMonthsBetween(startDate, endDate);
 
   // Calculate total periods for each frequency
   const totalWeeks = totalMonths * (52 / 12);
@@ -218,6 +204,8 @@ export const calculateFixedPeriodLoan = async (
   const currentBalance = parseFloat(data.currentBalance);
   const annualRate = parseFloat(data.interestRate) / 100;
   const monthlyRate = annualRate / 12;
+  const weeklyRate = annualRate / 52;
+  const fortnightlyRate = annualRate / 26;
 
   const loanStartDate = new Date(data.loanStartDate);
   const fixedStartDate = new Date(data.fixedRateStartDate);
@@ -237,8 +225,47 @@ export const calculateFixedPeriodLoan = async (
     analysisEndDate
   );
 
-  // Calculate monthly principal reduction (fixed amount)
-  const monthlyPrincipal = originalLoanAmount / totalLoanTermMonths;
+  // Calculate fixed monthly payment using remaining loan term
+  // This ensures the payment is realistic for the remaining loan period
+  const remainingMonthsFromLoanStart =
+    totalLoanTermMonths - calculateMonthsBetween(loanStartDate, fixedStartDate);
+
+  let monthlyPayment: number;
+  if (monthlyRate === 0) {
+    monthlyPayment = currentBalance / remainingMonthsFromLoanStart;
+  } else {
+    monthlyPayment =
+      (currentBalance *
+        (monthlyRate *
+          Math.pow(1 + monthlyRate, remainingMonthsFromLoanStart))) /
+      (Math.pow(1 + monthlyRate, remainingMonthsFromLoanStart) - 1);
+  }
+
+  // Calculate weekly and fortnightly payments using the same approach
+  const remainingWeeksFromLoanStart = remainingMonthsFromLoanStart * (52 / 12);
+  const remainingFortnightsFromLoanStart =
+    remainingMonthsFromLoanStart * (26 / 12);
+
+  let weeklyPayment: number;
+  if (weeklyRate === 0) {
+    weeklyPayment = currentBalance / remainingWeeksFromLoanStart;
+  } else {
+    weeklyPayment =
+      (currentBalance *
+        (weeklyRate * Math.pow(1 + weeklyRate, remainingWeeksFromLoanStart))) /
+      (Math.pow(1 + weeklyRate, remainingWeeksFromLoanStart) - 1);
+  }
+
+  let fortnightlyPayment: number;
+  if (fortnightlyRate === 0) {
+    fortnightlyPayment = currentBalance / remainingFortnightsFromLoanStart;
+  } else {
+    fortnightlyPayment =
+      (currentBalance *
+        (fortnightlyRate *
+          Math.pow(1 + fortnightlyRate, remainingFortnightsFromLoanStart))) /
+      (Math.pow(1 + fortnightlyRate, remainingFortnightsFromLoanStart) - 1);
+  }
 
   // Calculate payment breakdown for fixed rate period
   let remainingBalance = currentBalance;
@@ -248,8 +275,8 @@ export const calculateFixedPeriodLoan = async (
 
   for (let month = 0; month < totalFixedMonths; month++) {
     const monthInterest = remainingBalance * monthlyRate;
-    const monthPrincipalPaid = monthlyPrincipal;
-    const totalPayment = monthPrincipalPaid + monthInterest;
+    const monthPrincipalPaid = monthlyPayment - monthInterest;
+    const totalPayment = monthlyPayment;
 
     paymentBreakdown.push({
       month: month + 1,
@@ -280,10 +307,10 @@ export const calculateFixedPeriodLoan = async (
   let analysisInterestPaid = 0;
   let analysisBalance = currentBalance;
 
-  // Calculate principal and interest for analysis period
+  // Calculate principal and interest for analysis period using fixed payment
   for (let month = 0; month < analysisEndMonth; month++) {
     const monthInterest = analysisBalance * monthlyRate;
-    const monthPrincipalPaid = monthlyPrincipal;
+    const monthPrincipalPaid = monthlyPayment - monthInterest;
 
     if (month >= analysisStartMonth) {
       analysisPrincipalPaid += monthPrincipalPaid;
@@ -293,8 +320,7 @@ export const calculateFixedPeriodLoan = async (
     analysisBalance -= monthPrincipalPaid;
   }
 
-  const analysisAmountToPay =
-    monthlyPrincipal * analysisMonths + analysisInterestPaid;
+  const analysisAmountToPay = monthlyPayment * analysisMonths;
 
   // Calculate future estimate if rate provided
   let futureEstimate;
@@ -306,32 +332,41 @@ export const calculateFixedPeriodLoan = async (
     const remainingMonths =
       totalLoanTermMonths - calculateMonthsBetween(loanStartDate, fixedEndDate);
 
-    let futureTotalInterest = 0;
-    let futureBalance = remainingBalance;
-
-    for (let month = 0; month < remainingMonths; month++) {
-      const monthInterest = futureBalance * futureMonthlyRate;
-      futureTotalInterest += monthInterest;
-      futureBalance -= monthlyPrincipal;
+    // Calculate fixed payment for remaining period using future rate
+    let futureMonthlyPayment: number;
+    if (futureMonthlyRate === 0) {
+      futureMonthlyPayment = remainingBalance / remainingMonths;
+    } else {
+      futureMonthlyPayment =
+        (remainingBalance *
+          (futureMonthlyRate *
+            Math.pow(1 + futureMonthlyRate, remainingMonths))) /
+        (Math.pow(1 + futureMonthlyRate, remainingMonths) - 1);
     }
 
-    const futureTotalPayment =
-      monthlyPrincipal * remainingMonths + futureTotalInterest;
+    const futureTotalPayment = futureMonthlyPayment * remainingMonths;
+    const futureTotalInterest = futureTotalPayment - remainingBalance;
 
     futureEstimate = {
       rate: futureRate,
-      monthlyPayment: monthlyPrincipal + remainingBalance * futureMonthlyRate,
+      monthlyPayment: futureMonthlyPayment,
       totalPayment: futureTotalPayment,
       totalInterest: futureTotalInterest,
     };
   }
+
+  // Calculate average monthly principal reduction over the fixed period
+  const averageMonthlyPrincipal = totalPrincipalPaid / totalFixedMonths;
 
   return {
     totalPeriod: {
       startDate: data.fixedRateStartDate,
       endDate: data.fixedRateEndDate,
       months: totalFixedMonths,
-      monthlyPrincipal,
+      monthlyPayment,
+      weeklyPayment,
+      fortnightlyPayment,
+      monthlyPrincipal: averageMonthlyPrincipal,
       totalPaid,
       principalPaid: totalPrincipalPaid,
       interestPaid: totalInterestPaid,
@@ -350,18 +385,38 @@ export const calculateFixedPeriodLoan = async (
   };
 };
 
-// Helper function to calculate months between two dates
+// Helper function to calculate months between two dates with improved precision
 const calculateMonthsBetween = (startDate: Date, endDate: Date): number => {
-  const yearsDiff = endDate.getFullYear() - startDate.getFullYear();
-  const monthsDiff = endDate.getMonth() - startDate.getMonth();
-  const daysDiff = endDate.getDate() - startDate.getDate();
+  // Use UTC to avoid timezone issues, consistent with dateCalculations.ts
+  const start = new Date(
+    startDate.toISOString().split('T')[0] + 'T00:00:00.000Z'
+  );
+  const end = new Date(endDate.toISOString().split('T')[0] + 'T00:00:00.000Z');
+
+  const yearsDiff = end.getUTCFullYear() - start.getUTCFullYear();
+  const monthsDiff = end.getUTCMonth() - start.getUTCMonth();
+  const daysDiff = end.getUTCDate() - start.getUTCDate();
 
   let totalMonths = yearsDiff * 12 + monthsDiff;
+
+  // More precise day calculation using actual days in the month
   if (daysDiff > 0) {
-    totalMonths += daysDiff / 30; // Approximate additional days as fraction of month
+    const daysInStartMonth = new Date(
+      start.getUTCFullYear(),
+      start.getUTCMonth() + 1,
+      0
+    ).getUTCDate();
+    totalMonths += daysDiff / daysInStartMonth;
+  } else if (daysDiff < 0) {
+    const daysInEndMonth = new Date(
+      end.getUTCFullYear(),
+      end.getUTCMonth() + 1,
+      0
+    ).getUTCDate();
+    totalMonths += daysDiff / daysInEndMonth;
   }
 
-  return Math.round(totalMonths);
+  return Math.round(totalMonths * 100) / 100; // Round to 2 decimal places for precision
 };
 
 export const calculateFixedRateLoan = async (
@@ -378,54 +433,113 @@ export const calculateFixedRateLoan = async (
     loanEndDate
   );
 
-  // Calculate monthly principal reduction (fixed amount)
-  const monthlyPrincipal = loanAmount / totalLoanTermMonths;
+  // Validate periods for overlaps and gaps
+  const sortedPeriods = [...data.fixedRatePeriods].sort(
+    (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+  );
 
-  const periods = data.fixedRatePeriods.map(period => {
+  // Check for overlaps
+  for (let i = 0; i < sortedPeriods.length - 1; i++) {
+    const currentEnd = new Date(sortedPeriods[i].endDate);
+    const nextStart = new Date(sortedPeriods[i + 1].startDate);
+    if (currentEnd > nextStart) {
+      throw new Error(`Period ${i + 1} overlaps with period ${i + 2}`);
+    }
+  }
+
+  // Track running balance across all periods
+  let runningBalance = loanAmount;
+  const periods = sortedPeriods.map((period, periodIndex) => {
     const periodStartDate = new Date(period.startDate);
     const periodEndDate = new Date(period.endDate);
     const periodMonths = calculateMonthsBetween(periodStartDate, periodEndDate);
     const annualRate = parseFloat(period.interestRate) / 100;
     const monthlyRate = annualRate / 12;
 
-    let remainingBalance = loanAmount;
-    let totalInterest = 0;
-    const paymentBreakdown = [];
-
-    // Calculate balance at start of this period
+    // Calculate the remaining months after this period for proper amortization
     const monthsFromLoanStart = calculateMonthsBetween(
       loanStartDate,
       periodStartDate
     );
-    for (let month = 0; month < monthsFromLoanStart; month++) {
-      remainingBalance -= monthlyPrincipal;
+    const remainingMonthsAfterThisPeriod =
+      totalLoanTermMonths - monthsFromLoanStart;
+
+    // Calculate fixed payment for this period based on remaining balance
+    // but amortized over the remaining loan term (not just this period)
+    let monthlyPayment: number;
+    if (monthlyRate === 0) {
+      monthlyPayment = runningBalance / remainingMonthsAfterThisPeriod;
+    } else {
+      monthlyPayment =
+        (runningBalance *
+          (monthlyRate *
+            Math.pow(1 + monthlyRate, remainingMonthsAfterThisPeriod))) /
+        (Math.pow(1 + monthlyRate, remainingMonthsAfterThisPeriod) - 1);
     }
 
-    // Calculate payments for this period
+    // Calculate weekly and fortnightly payments using the same approach
+    const weeklyRate = annualRate / 52;
+    const fortnightlyRate = annualRate / 26;
+    const remainingWeeksAfterThisPeriod =
+      remainingMonthsAfterThisPeriod * (52 / 12);
+    const remainingFortnightsAfterThisPeriod =
+      remainingMonthsAfterThisPeriod * (26 / 12);
+
+    let weeklyPayment: number;
+    let fortnightlyPayment: number;
+
+    if (weeklyRate === 0) {
+      weeklyPayment = runningBalance / remainingWeeksAfterThisPeriod;
+    } else {
+      weeklyPayment =
+        (runningBalance *
+          (weeklyRate *
+            Math.pow(1 + weeklyRate, remainingWeeksAfterThisPeriod))) /
+        (Math.pow(1 + weeklyRate, remainingWeeksAfterThisPeriod) - 1);
+    }
+
+    if (fortnightlyRate === 0) {
+      fortnightlyPayment = runningBalance / remainingFortnightsAfterThisPeriod;
+    } else {
+      fortnightlyPayment =
+        (runningBalance *
+          (fortnightlyRate *
+            Math.pow(
+              1 + fortnightlyRate,
+              remainingFortnightsAfterThisPeriod
+            ))) /
+        (Math.pow(1 + fortnightlyRate, remainingFortnightsAfterThisPeriod) - 1);
+    }
+
+    // Calculate payment breakdown for this period
+    let periodBalance = runningBalance;
+    let totalInterest = 0;
+    let totalPrincipalPaid = 0;
+    const paymentBreakdown = [];
+
     for (let month = 0; month < periodMonths; month++) {
-      const monthInterest = remainingBalance * monthlyRate;
-      const monthPrincipalPaid = monthlyPrincipal;
-      const totalPayment = monthPrincipalPaid + monthInterest;
+      const monthInterest = periodBalance * monthlyRate;
+      const monthPrincipalPaid = monthlyPayment - monthInterest;
+      const totalPayment = monthlyPayment;
 
       paymentBreakdown.push({
-        month: monthsFromLoanStart + month + 1,
-        balance: remainingBalance,
+        month:
+          calculateMonthsBetween(loanStartDate, periodStartDate) + month + 1,
+        balance: periodBalance,
         principal: monthPrincipalPaid,
         interest: monthInterest,
-        totalPayment,
+        totalPayment: totalPayment,
       });
 
       totalInterest += monthInterest;
-      remainingBalance -= monthPrincipalPaid;
+      totalPrincipalPaid += monthPrincipalPaid;
+      periodBalance -= monthPrincipalPaid;
     }
 
-    const totalPayment = monthlyPrincipal * periodMonths + totalInterest;
-    const monthlyPayment = totalPayment / periodMonths;
+    // Update running balance for next period
+    runningBalance = periodBalance;
 
-    // Calculate weekly and fortnightly payments
-    // These should be proportional to the monthly payment, not calculated separately
-    const weeklyPayment = monthlyPayment * (12 / 52);
-    const fortnightlyPayment = monthlyPayment * (12 / 26);
+    const totalPayment = monthlyPayment * periodMonths;
 
     return {
       id: period.id,
@@ -439,7 +553,7 @@ export const calculateFixedRateLoan = async (
       fortnightlyPayment,
       totalPayment,
       totalInterest,
-      principalPaid: monthlyPrincipal * periodMonths,
+      principalPaid: totalPrincipalPaid,
       paymentBreakdown,
     };
   });

@@ -14,19 +14,20 @@ export function calculatePeriodBetween(
 ): number {
   if (!start || !end) return 0;
 
-  const startDate = new Date(start);
-  const endDate = new Date(end);
+  // Use UTC to avoid timezone issues
+  const startDate = new Date(start + 'T00:00:00.000Z');
+  const endDate = new Date(end + 'T00:00:00.000Z');
 
   if (type === 'days') {
     const diffTime = endDate.getTime() - startDate.getTime();
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   } else if (type === 'months') {
-    const yearDiff = endDate.getFullYear() - startDate.getFullYear();
-    const monthDiff = endDate.getMonth() - startDate.getMonth();
+    const yearDiff = endDate.getUTCFullYear() - startDate.getUTCFullYear();
+    const monthDiff = endDate.getUTCMonth() - startDate.getUTCMonth();
     return yearDiff * 12 + monthDiff;
   } else if (type === 'years') {
-    const yearDiff = endDate.getFullYear() - startDate.getFullYear();
-    const monthDiff = endDate.getMonth() - startDate.getMonth();
+    const yearDiff = endDate.getUTCFullYear() - startDate.getUTCFullYear();
+    const monthDiff = endDate.getUTCMonth() - startDate.getUTCMonth();
     return Math.floor((yearDiff * 12 + monthDiff) / 12);
   }
 
@@ -43,14 +44,15 @@ export function addPeriodToDate(
 ): string {
   if (!startDate || amount <= 0) return startDate;
 
-  const date = new Date(startDate);
+  // Use UTC to avoid timezone issues
+  const date = new Date(startDate + 'T00:00:00.000Z');
 
   if (type === 'days') {
-    date.setDate(date.getDate() + amount);
+    date.setUTCDate(date.getUTCDate() + amount);
   } else if (type === 'months') {
-    date.setMonth(date.getMonth() + amount);
+    date.setUTCMonth(date.getUTCMonth() + amount);
   } else if (type === 'years') {
-    date.setFullYear(date.getFullYear() + amount);
+    date.setUTCFullYear(date.getUTCFullYear() + amount);
   }
 
   return date.toISOString().split('T')[0];

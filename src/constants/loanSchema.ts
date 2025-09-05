@@ -121,26 +121,22 @@ export const fixedRateLoanFormSchema = z
         if (periodStart < loanStart || periodEnd > loanEnd) return false;
       }
 
-      // Fixed rate periods should not overlap
-      for (let i = 0; i < data.fixedRatePeriods.length; i++) {
-        for (let j = i + 1; j < data.fixedRatePeriods.length; j++) {
-          const period1 = data.fixedRatePeriods[i];
-          const period2 = data.fixedRatePeriods[j];
+      // Fixed rate periods should be sequential (no gaps, no overlaps)
+      for (let i = 0; i < data.fixedRatePeriods.length - 1; i++) {
+        const currentPeriod = data.fixedRatePeriods[i];
+        const nextPeriod = data.fixedRatePeriods[i + 1];
 
-          const start1 = new Date(period1.startDate);
-          const end1 = new Date(period1.endDate);
-          const start2 = new Date(period2.startDate);
-          const end2 = new Date(period2.endDate);
+        const currentEnd = new Date(currentPeriod.endDate);
+        const nextStart = new Date(nextPeriod.startDate);
 
-          // Check for overlap
-          if (start1 < end2 && start2 < end1) return false;
-        }
+        // Next period should start exactly when current period ends
+        if (currentEnd.getTime() !== nextStart.getTime()) return false;
       }
 
       return true;
     },
     {
-      message: 'Fixed rate periods must be within loan period and not overlap',
+      message: 'Fixed rate periods must be sequential and within loan period',
       path: ['fixedRatePeriods'],
     }
   );

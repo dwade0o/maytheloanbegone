@@ -1,5 +1,6 @@
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
 import { Plus, Calendar } from 'lucide-react';
 
 import { Button } from '@/components/client/ui/button';
@@ -65,10 +66,13 @@ export default function FixedRateLoanForm({
 
   const addPeriod = () => {
     const newId = (fields.length + 1).toString();
+    const lastPeriod = watchedPeriods[watchedPeriods.length - 1];
+    const newStartDate = lastPeriod?.endDate || watchedLoanStartDate || '';
+
     append({
       id: newId,
       interestRate: '',
-      startDate: '',
+      startDate: newStartDate,
       endDate: '',
       label: '',
     });
@@ -86,7 +90,46 @@ export default function FixedRateLoanForm({
     value: string
   ) => {
     setValue(`fixedRatePeriods.${index}.${field}`, value);
+
+    // If updating end date, update subsequent periods' start dates
+    if (field === 'endDate' && value) {
+      updateSubsequentPeriods(index, value);
+    }
   };
+
+  const updateSubsequentPeriods = (
+    updatedIndex: number,
+    newEndDate: string
+  ) => {
+    const periods = watchedPeriods || [];
+
+    // Update start dates for all periods after the updated one
+    for (let i = updatedIndex + 1; i < periods.length; i++) {
+      setValue(`fixedRatePeriods.${i}.startDate`, newEndDate);
+
+      // If this period has an end date, use it for the next period
+      const currentPeriod = periods[i];
+      if (currentPeriod?.endDate) {
+        newEndDate = currentPeriod.endDate;
+      } else {
+        // If this period doesn't have an end date, break the chain
+        break;
+      }
+    }
+  };
+
+  // Set first period's start date when loan start date changes
+  useEffect(() => {
+    if (watchedLoanStartDate && watchedPeriods && watchedPeriods.length > 0) {
+      const firstPeriod = watchedPeriods[0];
+      if (
+        !firstPeriod.startDate ||
+        firstPeriod.startDate !== watchedLoanStartDate
+      ) {
+        setValue('fixedRatePeriods.0.startDate', watchedLoanStartDate);
+      }
+    }
+  }, [watchedLoanStartDate, watchedPeriods, setValue]);
 
   const handleReset = () => {
     reset();
@@ -255,6 +298,7 @@ export default function FixedRateLoanForm({
               }
               onRemove={() => removePeriod(index)}
               canRemove={fields.length > 1}
+              isStartDateDisabled={true}
               errors={errors.fixedRatePeriods?.[index]}
             />
           ))}

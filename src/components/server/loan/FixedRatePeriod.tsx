@@ -20,6 +20,7 @@ export default function FixedRatePeriodComponent({
   onUpdate,
   onRemove,
   canRemove,
+  isStartDateDisabled = false,
   errors = {},
 }: FixedRatePeriodProps) {
   const fadeInUp = {
@@ -102,6 +103,7 @@ export default function FixedRatePeriodComponent({
               value: period.startDate,
               onChange: value => onUpdate('startDate', value),
               error: errors.startDate,
+              disabled: isStartDateDisabled,
             }}
             endDate={{
               value: period.endDate,

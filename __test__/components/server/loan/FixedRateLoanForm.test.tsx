@@ -56,13 +56,15 @@ jest.mock('@/components/server/loan/FixedRatePeriod', () => ({
     index, 
     onUpdate, 
     onRemove, 
-    canRemove 
+    canRemove,
+    isStartDateDisabled = false
   }: { 
     period: { label?: string; interestRate?: string; startDate?: string; endDate?: string };
     index: number;
     onUpdate: (field: string, value: string) => void;
     onRemove: () => void;
     canRemove: boolean;
+    isStartDateDisabled?: boolean;
   }) => (
     <div data-testid={`fixed-rate-period-${index}`}>
       <h3>Fixed Rate Period {index + 1}</h3>
@@ -80,6 +82,8 @@ jest.mock('@/components/server/loan/FixedRatePeriod', () => ({
         data-testid={`period-start-${index}`}
         value={period.startDate || ''}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => onUpdate('startDate', e.target.value)}
+        disabled={isStartDateDisabled}
+        data-disabled={isStartDateDisabled}
       />
       <input
         data-testid={`period-end-${index}`}
@@ -342,5 +346,94 @@ describe('FixedRateLoanForm', () => {
     
     const submitButton = screen.getByText('Calculating...');
     expect(submitButton).toBeDisabled();
+  });
+
+  describe('Sequential Period Validation', () => {
+    it('disables start date for first period', () => {
+      render(<FixedRateLoanForm {...mockProps} />);
+      
+      const firstPeriodStartInput = screen.getByTestId('period-start-0');
+      expect(firstPeriodStartInput).toBeDisabled();
+      expect(firstPeriodStartInput).toHaveAttribute('data-disabled', 'true');
+    });
+
+    it('disables start date for subsequent periods', async () => {
+      render(<FixedRateLoanForm {...mockProps} />);
+      
+      // Add a second period
+      const addButton = screen.getByText('Add Period');
+      fireEvent.click(addButton);
+      
+      await waitFor(() => {
+        const secondPeriodStartInput = screen.getByTestId('period-start-1');
+        expect(secondPeriodStartInput).toBeDisabled();
+        expect(secondPeriodStartInput).toHaveAttribute('data-disabled', 'true');
+      });
+    });
+
+    it('auto-sets start date for new periods based on previous period end date', async () => {
+      render(<FixedRateLoanForm {...mockProps} />);
+      
+      // Set loan start date
+      const startDateInput = screen.getByTestId('start-date-input');
+      fireEvent.change(startDateInput, { target: { value: '2024-01-01' } });
+      
+      // Set first period end date
+      const firstPeriodEndInput = screen.getByTestId('period-end-0');
+      fireEvent.change(firstPeriodEndInput, { target: { value: '2024-06-30' } });
+      
+      // Add a second period
+      const addButton = screen.getByText('Add Period');
+      fireEvent.click(addButton);
+      
+      await waitFor(() => {
+        const secondPeriodStartInput = screen.getByTestId('period-start-1');
+        expect(secondPeriodStartInput).toHaveValue('2024-06-30');
+      });
+    });
+
+    it('updates subsequent periods when a period end date changes', async () => {
+      render(<FixedRateLoanForm {...mockProps} />);
+      
+      // Set loan dates
+      const startDateInput = screen.getByTestId('start-date-input');
+      const endDateInput = screen.getByTestId('end-date-input');
+      fireEvent.change(startDateInput, { target: { value: '2024-01-01' } });
+      fireEvent.change(endDateInput, { target: { value: '2024-12-31' } });
+      
+      // Set first period end date
+      const firstPeriodEndInput = screen.getByTestId('period-end-0');
+      fireEvent.change(firstPeriodEndInput, { target: { value: '2024-03-31' } });
+      
+      // Add second period
+      const addButton = screen.getByText('Add Period');
+      fireEvent.click(addButton);
+      
+      await waitFor(() => {
+        const secondPeriodStartInput = screen.getByTestId('period-start-1');
+        expect(secondPeriodStartInput).toHaveValue('2024-03-31');
+      });
+      
+      // Change first period end date - this should update the second period
+      fireEvent.change(firstPeriodEndInput, { target: { value: '2024-02-28' } });
+      
+      await waitFor(() => {
+        const secondPeriodStartInput = screen.getByTestId('period-start-1');
+        expect(secondPeriodStartInput).toHaveValue('2024-02-28');
+      });
+    });
+
+    it('sets first period start date to loan start date when loan start date changes', async () => {
+      render(<FixedRateLoanForm {...mockProps} />);
+      
+      // Set loan start date
+      const startDateInput = screen.getByTestId('start-date-input');
+      fireEvent.change(startDateInput, { target: { value: '2024-01-01' } });
+      
+      await waitFor(() => {
+        const firstPeriodStartInput = screen.getByTestId('period-start-0');
+        expect(firstPeriodStartInput).toHaveValue('2024-01-01');
+      });
+    });
   });
 });

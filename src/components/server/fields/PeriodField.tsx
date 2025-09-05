@@ -51,7 +51,8 @@ export default function PeriodField({
         <Input
           id={id}
           type="number"
-          min="1"
+          min="0.1"
+          step="0.1"
           value={value}
           onChange={e => onChange(e.target.value)}
           className="text-base flex-1 min-w-[80px]"

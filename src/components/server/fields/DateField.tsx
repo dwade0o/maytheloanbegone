@@ -11,6 +11,7 @@ interface DateFieldProps {
   showIcon?: boolean;
   min?: string;
   max?: string;
+  disabled?: boolean;
   className?: string;
 }
 
@@ -23,6 +24,7 @@ export default function DateField({
   showIcon = false,
   min,
   max,
+  disabled = false,
   className = '',
 }: DateFieldProps) {
   return (
@@ -39,9 +41,10 @@ export default function DateField({
         type="date"
         value={value}
         onChange={e => onChange(e.target.value)}
+        disabled={disabled}
         {...(min && { min })}
         {...(max && { max })}
-        className={`text-base ${error ? 'border-red-500 focus:border-red-500' : ''}`}
+        className={`text-base ${error ? 'border-red-500 focus:border-red-500' : ''} ${disabled ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : ''}`}
       />
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
