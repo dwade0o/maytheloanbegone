@@ -8,6 +8,7 @@ import {
   CalculatorResults,
 } from '@/components/client/calculator';
 import { FeaturesInfo } from '@/components/server/common';
+import FAQSection from '@/components/shared/FAQSection';
 import {
   ResponsiveAdSenseAd,
   AdSenseRectangleAd,
@@ -155,16 +156,20 @@ export default function LoanCalculator() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Header */}
-        <div className="text-center mb-12">
+        <header className="text-center mb-12">
           <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-            Advanced Loan Calculator
+            May the loan be gone
           </h1>
+          <h2 className="text-2xl font-semibold text-slate-700 dark:text-slate-300 mb-4">
+            Free Online Loan Calculator
+          </h2>
           <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
             Calculate loan payments, compare different scenarios, and make
             informed financial decisions with our comprehensive loan calculator
-            suite.
+            suite. Support for single loans, split loans, fixed period, and
+            fixed rate loans.
           </p>
-        </div>
+        </header>
 
         {/* Calculator Selector */}
         <CalculatorSelector
@@ -205,6 +210,9 @@ export default function LoanCalculator() {
 
         {/* Features Info - Server Component */}
         <FeaturesInfo />
+
+        {/* FAQ Section for SEO */}
+        <FAQSection />
 
         {/* Bottom Ad - AdSense Banner (Hidden for now) */}
         {/* <div className="mt-8">

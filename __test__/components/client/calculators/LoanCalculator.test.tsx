@@ -91,7 +91,7 @@ jest.mock('@/lib/helper/loanCalculations', () => ({
 describe('LoanCalculator', () => {
   it('renders without crashing', () => {
     render(<LoanCalculator />);
-    expect(screen.getByText('Advanced Loan Calculator')).toBeInTheDocument();
+    expect(screen.getByText('May the loan be gone')).toBeInTheDocument();
   });
 
   it('renders all main sections', () => {
@@ -132,10 +132,11 @@ describe('LoanCalculator', () => {
   it('displays correct header and description', () => {
     render(<LoanCalculator />);
     
-    expect(screen.getByText('Advanced Loan Calculator')).toBeInTheDocument();
+    expect(screen.getByText('May the loan be gone')).toBeInTheDocument();
+    expect(screen.getByText('Free Online Loan Calculator')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Calculate loan payments, compare different scenarios, and make informed financial decisions with our comprehensive loan calculator suite.'
+        'Calculate loan payments, compare different scenarios, and make informed financial decisions with our comprehensive loan calculator suite. Support for single loans, split loans, fixed period, and fixed rate loans.'
       )
     ).toBeInTheDocument();
   });

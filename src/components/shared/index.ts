@@ -29,3 +29,7 @@ export {
   AdSenseMobileBannerAd,
   ResponsiveAdSenseAd,
 } from './AdSenseAd';
+
+// SEO components
+export { default as StructuredData } from './StructuredData';
+export { default as FAQSection } from './FAQSection';
