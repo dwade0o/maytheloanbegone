@@ -199,7 +199,7 @@ export const calculateFixedPeriodLoan = async (
   // Simulate calculation delay for smooth UX
   await new Promise(resolve => setTimeout(resolve, 800));
 
-  const originalLoanAmount = parseFloat(data.loanAmount);
+  // const originalLoanAmount = parseFloat(data.loanAmount);
   const totalLoanTermYears = parseFloat(data.totalLoanTermYears);
   const currentBalance = parseFloat(data.currentBalance);
   const annualRate = parseFloat(data.interestRate) / 100;
@@ -449,7 +449,7 @@ export const calculateFixedRateLoan = async (
 
   // Track running balance across all periods
   let runningBalance = loanAmount;
-  const periods = sortedPeriods.map((period, periodIndex) => {
+  const periods = sortedPeriods.map(period => {
     const periodStartDate = new Date(period.startDate);
     const periodEndDate = new Date(period.endDate);
     const periodMonths = calculateMonthsBetween(periodStartDate, periodEndDate);

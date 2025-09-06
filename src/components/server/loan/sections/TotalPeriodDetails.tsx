@@ -3,7 +3,15 @@ import { formatCurrency } from '@/lib/helper/loanCalculations';
 import ResultRow from '@/components/shared/ResultRow';
 
 interface TotalPeriodDetailsProps {
-  results: any;
+  results: {
+    totalPeriod: {
+      totalPaid: number;
+      interestPaid: number;
+      principalPaid: number;
+      remainingBalance: number;
+      months: number;
+    };
+  };
 }
 
 export default function TotalPeriodDetails({

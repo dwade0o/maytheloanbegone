@@ -3,7 +3,14 @@ import { Badge } from '@/components/client/ui/badge';
 import { formatCurrency } from '@/lib/helper/loanCalculations';
 
 interface FutureEstimateProps {
-  results: any;
+  results: {
+    futureEstimate?: {
+      rate: string;
+      monthlyPayment: number;
+      totalPayment: number;
+      totalInterest: number;
+    };
+  };
 }
 
 export default function FutureEstimate({ results }: FutureEstimateProps) {

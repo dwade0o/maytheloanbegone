@@ -2,7 +2,17 @@ import { Badge } from '@/components/client/ui/badge';
 import { formatCurrency } from '@/lib/helper/loanCalculations';
 
 interface PaymentBreakdownProps {
-  results: any;
+  results: {
+    totalPeriod: {
+      paymentBreakdown: Array<{
+        month: number;
+        principal: number;
+        interest: number;
+        totalPayment: number;
+        balance: number;
+      }>;
+    };
+  };
 }
 
 export default function PaymentBreakdown({ results }: PaymentBreakdownProps) {
@@ -12,7 +22,7 @@ export default function PaymentBreakdown({ results }: PaymentBreakdownProps) {
         Monthly Payment Breakdown
       </h3>
       <div className="space-y-3 max-h-64 overflow-y-auto">
-        {results.totalPeriod.paymentBreakdown.slice(0, 6).map((month: any) => (
+        {results.totalPeriod.paymentBreakdown.slice(0, 6).map(month => (
           <div
             key={month.month}
             className="flex justify-between items-center p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50"

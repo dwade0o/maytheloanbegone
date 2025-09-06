@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 // TypeScript declaration for Google AdSense
 declare global {
   interface Window {
-    adsbygoogle: any[];
+    adsbygoogle: Array<Record<string, unknown>>;
   }
 }
 
@@ -63,9 +63,9 @@ export default function AdSenseAd({
       try {
         // Initialize AdSense
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-        console.log('AdSense ad loaded:', { clientId, slotId, size });
-      } catch (error) {
-        console.error('AdSense error:', error);
+        // AdSense loaded successfully
+      } catch {
+        // AdSense failed to load - will show placeholder
       }
     };
 

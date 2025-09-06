@@ -2,7 +2,16 @@ import { Badge } from '@/components/client/ui/badge';
 import { formatCurrency } from '@/lib/helper/loanCalculations';
 
 interface AnalysisPeriodResultsProps {
-  results: any;
+  results: {
+    selectedPeriod: {
+      startDate: string;
+      endDate: string;
+      months: number;
+      amountToPay: number;
+      principalPaid: number;
+      interestPaid: number;
+    };
+  };
 }
 
 export default function AnalysisPeriodResults({

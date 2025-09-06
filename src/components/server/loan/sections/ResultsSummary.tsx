@@ -1,7 +1,20 @@
 import { formatCurrency } from '@/lib/helper/loanCalculations';
 
 interface ResultsSummaryProps {
-  results: any;
+  results: {
+    totalPeriod: {
+      months: number;
+      interestPaid: number;
+      principalPaid: number;
+      remainingBalance: number;
+    };
+    futureEstimate?: {
+      rate: string;
+      monthlyPayment: number;
+      totalPayment: number;
+      totalInterest: number;
+    };
+  };
 }
 
 export default function ResultsSummary({ results }: ResultsSummaryProps) {

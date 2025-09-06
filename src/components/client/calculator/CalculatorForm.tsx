@@ -12,7 +12,7 @@ import { CalculatorType } from '@/types/loan';
 
 interface CalculatorFormProps {
   calculatorType: CalculatorType;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => Promise<void> | void;
   onReset: () => void;
   isCalculating: boolean;
 }

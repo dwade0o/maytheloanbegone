@@ -7,7 +7,19 @@ import PaymentFrequencySelector, {
 import PaymentFrequencyResults from '@/components/server/loan/sections/PaymentFrequencyResults';
 
 interface PaymentFrequencyControllerProps {
-  results: any;
+  results: {
+    totalPeriod: {
+      months: number;
+      weeklyPayment: number;
+      fortnightlyPayment: number;
+      monthlyPayment: number;
+      monthlyPrincipal: number;
+      paymentBreakdown: Array<{
+        interest: number;
+        totalPayment: number;
+      }>;
+    };
+  } | null;
 }
 
 export default function PaymentFrequencyController({

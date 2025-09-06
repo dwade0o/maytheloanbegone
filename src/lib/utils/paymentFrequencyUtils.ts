@@ -25,7 +25,13 @@ export function convertMonthlyToFrequency(
  * Gets the payment amount for the specified frequency
  */
 export function getPaymentAmount(
-  results: any,
+  results: {
+    totalPeriod: {
+      weeklyPayment: number;
+      fortnightlyPayment: number;
+      monthlyPayment: number;
+    };
+  } | null,
   frequency: PaymentFrequency
 ): number {
   if (!results) return 0;
@@ -43,7 +49,7 @@ export function getPaymentAmount(
  * Gets the principal reduction amount for the specified frequency
  */
 export function getPrincipalReduction(
-  results: any,
+  results: { totalPeriod: { monthlyPrincipal: number } } | null,
   frequency: PaymentFrequency
 ): number {
   if (!results) return 0;
@@ -57,7 +63,9 @@ export function getPrincipalReduction(
  * Gets the first payment interest amount for the specified frequency
  */
 export function getFirstPaymentInterest(
-  results: any,
+  results: {
+    totalPeriod: { paymentBreakdown: Array<{ interest: number }> };
+  } | null,
   frequency: PaymentFrequency
 ): number {
   if (!results) return 0;
@@ -70,7 +78,9 @@ export function getFirstPaymentInterest(
  * Gets the first payment total amount for the specified frequency
  */
 export function getFirstPaymentTotal(
-  results: any,
+  results: {
+    totalPeriod: { paymentBreakdown: Array<{ totalPayment: number }> };
+  } | null,
   frequency: PaymentFrequency
 ): number {
   if (!results) return 0;

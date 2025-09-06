@@ -17,7 +17,19 @@ import {
 } from '@/lib/utils/frequencyLabelUtils';
 
 interface PaymentFrequencyResultsProps {
-  results: any;
+  results: {
+    totalPeriod: {
+      months: number;
+      weeklyPayment: number;
+      fortnightlyPayment: number;
+      monthlyPayment: number;
+      monthlyPrincipal: number;
+      paymentBreakdown: Array<{
+        interest: number;
+        totalPayment: number;
+      }>;
+    };
+  } | null;
   selectedFrequency: PaymentFrequency;
 }
 
@@ -25,6 +37,8 @@ export default function PaymentFrequencyResults({
   results,
   selectedFrequency,
 }: PaymentFrequencyResultsProps) {
+  if (!results) return null;
+
   return (
     <>
       <FeaturedResult
