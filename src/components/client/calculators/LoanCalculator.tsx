@@ -9,6 +9,12 @@ import {
 } from '@/components/client/calculator';
 import { FeaturesInfo } from '@/components/server/common';
 import {
+  ResponsiveAdSenseAd,
+  AdSenseRectangleAd,
+  AdSenseBannerAd,
+} from '@/components/shared/AdSenseAd';
+import { getAdSenseSettings } from '@/config/adsense';
+import {
   FormData,
   SplitLoanFormData,
   FixedPeriodLoanData,
@@ -29,6 +35,7 @@ import {
 
 export default function LoanCalculator() {
   const { calculatorType, switchCalculatorType } = useCalculatorManager();
+  const adSenseSettings = getAdSenseSettings();
 
   // Results state
   const [singleResults, setSingleResults] = useState<LoanResults | null>(null);
@@ -165,6 +172,14 @@ export default function LoanCalculator() {
           onCalculatorChange={switchCalculatorType}
         />
 
+        {/* Above-the-fold Ad - AdSense (Hidden for now) */}
+        {/* <div className="mb-8">
+          <ResponsiveAdSenseAd
+            clientId={adSenseSettings.clientId}
+            slotId={adSenseSettings.slots.TOP_BANNER}
+          />
+        </div> */}
+
         {/* Calculator Form and Results */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <CalculatorForm
@@ -180,8 +195,24 @@ export default function LoanCalculator() {
           />
         </div>
 
+        {/* Between Content Ad - AdSense Rectangle (Hidden for now) */}
+        {/* <div className="my-8 flex justify-center">
+          <AdSenseRectangleAd
+            clientId={adSenseSettings.clientId}
+            slotId={adSenseSettings.slots.MIDDLE_RECTANGLE}
+          />
+        </div> */}
+
         {/* Features Info - Server Component */}
         <FeaturesInfo />
+
+        {/* Bottom Ad - AdSense Banner (Hidden for now) */}
+        {/* <div className="mt-8">
+          <AdSenseBannerAd
+            clientId={adSenseSettings.clientId}
+            slotId={adSenseSettings.slots.BOTTOM_BANNER}
+          />
+        </div> */}
       </div>
     </div>
   );

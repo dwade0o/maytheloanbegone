@@ -7,3 +7,25 @@ export { default as LoanFormBase } from './LoanFormBase';
 export { default as LoanResultsBase } from './LoanResultsBase';
 export { default as PaymentFrequencySelector } from './PaymentFrequencySelector';
 export { default as ResultRow } from './ResultRow';
+
+// Ad components
+export {
+  default as AdPlaceholder,
+  MobileBannerAd,
+  MobileLeaderboardAd,
+  TabletBannerAd,
+  DesktopBannerAd,
+  ResponsiveBannerAd,
+  RectangleAd,
+  SidebarAd,
+  SquareAd,
+} from './AdPlaceholder';
+
+// Production AdSense components
+export {
+  default as AdSenseAd,
+  AdSenseBannerAd,
+  AdSenseRectangleAd,
+  AdSenseMobileBannerAd,
+  ResponsiveAdSenseAd,
+} from './AdSenseAd';
